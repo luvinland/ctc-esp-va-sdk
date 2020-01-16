@@ -20,6 +20,8 @@
 #include <esp_log.h>
 #include <audio_board.h>
 
+#define CTC_REV01 // Jace. 191231.
+
 #define PLAT_TAG "AUDIO_BOARD"
 
 #define PLAT_ASSERT(a, format, b, ...) \
@@ -28,6 +30,31 @@
         return b;\
     }
 
+#ifdef CTC_REV01
+esp_err_t audio_board_i2s_pin_config(int port_num, i2s_pin_config_t *pf_i2s_pin)
+{   
+    PLAT_ASSERT(pf_i2s_pin, "Error assigning i2s pins", -1);
+    switch(port_num) {
+        case 0:
+            pf_i2s_pin->bck_io_num = GPIO_NUM_23;
+            pf_i2s_pin->ws_io_num =  GPIO_NUM_19;
+            pf_i2s_pin->data_out_num = GPIO_NUM_18;
+            pf_i2s_pin->data_in_num = GPIO_NUM_5;
+            break;
+        case 1:
+            pf_i2s_pin->bck_io_num = GPIO_NUM_23;
+            pf_i2s_pin->ws_io_num =  GPIO_NUM_19;
+            pf_i2s_pin->data_out_num = GPIO_NUM_18;
+            pf_i2s_pin->data_in_num = GPIO_NUM_5;
+            break;
+        default:
+            ESP_LOGE(PLAT_TAG, "Entered i2s port number is wrong");
+            return ESP_FAIL;
+    }
+
+    return ESP_OK; 
+}
+#else
 esp_err_t audio_board_i2s_pin_config(int port_num, i2s_pin_config_t *pf_i2s_pin)
 {   
     PLAT_ASSERT(pf_i2s_pin, "Error assigning i2s pins", -1);
@@ -54,6 +81,7 @@ esp_err_t audio_board_i2s_pin_config(int port_num, i2s_pin_config_t *pf_i2s_pin)
 
     return ESP_OK; 
 }
+#endif
 
 esp_err_t audio_board_i2c_pin_config(int port_num, i2c_config_t *pf_i2c_pin)
 {   

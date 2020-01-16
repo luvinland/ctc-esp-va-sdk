@@ -28,6 +28,8 @@
 #include "es8388.h"
 #include <audio_board.h>
 
+#define CTC_REV01 // Jace. 191231.
+
 #define ES_TAG "CODEC_ES8388"
 
 #define ES8388_DISABLE_MUTE 0x00   //disable mute
@@ -253,6 +255,9 @@ esp_err_t es8388_init(media_hal_config_t *media_hal_conf)
 
     esp_err_t res;
 
+#ifdef CTC_REV01
+	res = ESP_OK;
+#else
     audio_codec_i2c_init(port_num);   //set i2c pin and i2c clock frequency for esp32
 
 #ifndef ES8388_DISABLE_PA_PIN
@@ -311,6 +316,7 @@ esp_err_t es8388_init(media_hal_config_t *media_hal_conf)
     }
     //     es8388_write_reg(ES8388_ADDR, ES8388_ADCCONTROL8, 0xC0);
     //res |= es8388_write_reg(ES8388_ADDR, ES8388_ADCCONTROL9,0xC0);
+#endif
     return res;
 }
 
@@ -340,6 +346,10 @@ esp_err_t es8388_control_volume(uint8_t volume)
     if (volume > 100) {
         volume = 100;
     }
+
+#ifdef CTC_REV01
+	res = ESP_OK;
+#else
     res = es8388_read_reg(ES8388_DACCONTROL3, &reg);
     reg = reg & 0xFB;
     res |= es8388_write_reg(ES8388_ADDR, ES8388_DACCONTROL3, reg | (ES8388_DISABLE_MUTE << 2));
@@ -348,6 +358,7 @@ esp_err_t es8388_control_volume(uint8_t volume)
     res |= es8388_write_reg(ES8388_ADDR, ES8388_DACCONTROL25, volume);
     res |= es8388_write_reg(ES8388_ADDR, ES8388_DACCONTROL26, 0);
     res |= es8388_write_reg(ES8388_ADDR, ES8388_DACCONTROL27, 0);
+#endif
     return res;
 }
 

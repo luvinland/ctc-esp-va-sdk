@@ -44,6 +44,25 @@
 
 static const char *TAG = "[app_main]";
 
+#define CTC_REV01 // Jace. 191230. 
+
+#ifdef CTC_REV01
+#define TRI_LED 14
+#define RES_LED 13
+
+static void ctc_led_init(void)
+{
+    gpio_pad_select_gpio(TRI_LED);
+    gpio_set_direction(TRI_LED, GPIO_MODE_OUTPUT);
+    gpio_set_level(TRI_LED, 0);
+
+    gpio_pad_select_gpio(RES_LED);
+    gpio_set_direction(RES_LED, GPIO_MODE_OUTPUT);
+    gpio_set_level(RES_LED, 0);
+}
+#endif
+
+
 static EventGroupHandle_t cm_event_group;
 const int CONNECTED_BIT = BIT0;
 const int PROV_DONE_BIT = BIT1;
@@ -133,7 +152,11 @@ void app_main()
     static media_hal_config_t media_hal_conf = MEDIA_HAL_DEFAULT();
     media_hal_init(&media_hal_conf);
 
-    va_board_button_init();
+#ifdef CTC_REV01
+	ctc_led_init();
+#else
+	va_board_button_init();
+#endif
     va_board_led_init();
 
     scli_init();

@@ -22,6 +22,8 @@
 #include "es8388.h"
 #include <media_hal_codec_init.h>
 
+#define CTC_REV01 // Jace. 191231.
+
 #define HAL_TAG "MEDIA_HAL_CODEC_INIT"
 
 #define mutex_create() \
@@ -57,10 +59,12 @@ esp_err_t media_hal_codec_init(media_hal_t *media_hal, media_hal_config_t *media
         media_hal_func_init(media_hal);
         mutex_lock(media_hal->media_hal_lock);
         ret  = media_hal->audio_codec_initialize(media_hal_conf);
+#ifndef CTC_REV01
         ret |= media_hal->audio_codec_config_format(media_hal_conf->codec_mode, 0);
         ret |= media_hal->audio_codec_set_i2s_clk(media_hal_conf->codec_mode, media_hal_conf->bit_length);
         ret |= media_hal->audio_codec_control_volume(MEDIA_HAL_VOL_DEFAULT);
         // ret |= media_hal->audio_codec_powerdown();
+#endif
         mutex_unlock(media_hal->media_hal_lock);
     } else {
         ESP_LOGW(HAL_TAG, "Codec handle or config is NULL");

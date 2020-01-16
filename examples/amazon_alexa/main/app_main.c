@@ -46,6 +46,7 @@ static const char *TAG = "[app_main]";
 
 #define CTC_REV01 // Jace. 191230. 
 #define CTC_CS48L32 // Jace. 191230. 
+#define CTC_CS48L32_SENSORY // Jace. 200109. Ready Sensory's trigger with CS48L32
 
 #ifdef CTC_REV01
 #define TRI_LED 14
@@ -557,6 +558,53 @@ static void swap_endianness(uint8_t* out, uint8_t* in, uint8_t size)
 		out[size - 1 - i] = in[i];
 	}
 }
+
+#ifdef CTC_CS48L32_SENSORY
+esp_err_t cs_spi_sensory_ready(void);
+
+#define CS48L32_SENSORY_READY_REG	(4)
+static const uint32_t cs48l32_sensory_ready[CS48L32_SENSORY_READY_REG][2] =
+{
+	{0x82800488,	0x0},
+	{0x18030,		0x0001},
+	{0x2800480,		0x0020},
+	{0x2800480,		0x0001}
+};
+
+esp_err_t cs_spi_sensory_ready(void)
+{
+	esp_err_t ret = ESP_OK;
+
+	for(uint8_t i = 0; i < CS48L32_SENSORY_READY_REG; i++)
+	{
+		spi_transaction_t t;
+		memset(&t, 0, sizeof(t));
+
+		uint8_t* dataOut = (uint8_t*)malloc(12);
+		assert(0 != dataOut);
+
+		t.length = 96;
+
+		swap_endianness(&dataOut[0], (uint8_t*)&cs48l32_sensory_ready[i][0], 4);
+		swap_endianness(&dataOut[4], (uint8_t*)&cs48l32_spi_padding, 4);
+		swap_endianness(&dataOut[8], (uint8_t*)&cs48l32_sensory_ready[i][1], 4);
+
+		t.tx_buffer = dataOut;
+
+		ret = spi_device_transmit(g_spi, &t);
+
+		if (dataOut)
+		{
+			free(dataOut);
+			dataOut = NULL;
+		}
+	}
+
+	ESP_LOGE(TAG, "[CS48L32] Sensory ready");
+
+	return ret;
+}
+#endif
 
 static void ak_reset(void)
 {

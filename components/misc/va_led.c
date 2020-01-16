@@ -12,6 +12,12 @@
 
 //#define EN_STACK_MEASUREMENT
 
+#define CTC_CS48L32_SENSORY // Jace. 200109. Ready Sensory's trigger with CS48L32
+
+#if defined(CTC_CS48L32_SENSORY)
+extern esp_err_t cs_spi_sensory_ready(void);
+#endif
+
 static const char *TAG = "[va_led]";
 
 static int NOTIFICATION_IS_PRESENT = 0;
@@ -165,6 +171,10 @@ static void va_led_task(void *arg)
                     va_led_tick = portMAX_DELAY;
                 break;
                 case VA_IDLE :
+#if defined(CTC_CS48L32_SENSORY)
+					cs_spi_sensory_ready();
+#endif
+
                     if(va_led_listening_end_flag && (va_led_priority[3].va_led_current_state == VA_IDLE)) {
                         va_led_set_state(va_led_con[VA_LED_WW_DEACTIVATE].va_led_state_sz, va_led_con[VA_LED_WW_DEACTIVATE].va_led_state_st);
                         va_led_listening_end_flag = false;

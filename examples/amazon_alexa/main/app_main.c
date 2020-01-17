@@ -604,6 +604,48 @@ esp_err_t cs_spi_sensory_ready(void)
 
 	return ret;
 }
+
+#define CS48L32_SENSORY_DISABLE_REG	(2)
+static const uint32_t cs48l32_sensory_disable[CS48L32_SENSORY_DISABLE_REG][2] =
+{
+	{0x82800488,	0x0},
+	{0x2800488,		0x0000}
+};
+
+static esp_err_t cs_spi_sensory_disable(void)
+{
+	esp_err_t ret = ESP_OK;
+
+	for(uint8_t i = 0; i < CS48L32_SENSORY_DISABLE_REG; i++)
+	{
+		spi_transaction_t t;
+		memset(&t, 0, sizeof(t));
+
+		uint8_t* dataOut = (uint8_t*)malloc(12);
+		assert(0 != dataOut);
+
+		t.length = 96;
+
+		swap_endianness(&dataOut[0], (uint8_t*)&cs48l32_sensory_disable[i][0], 4);
+		swap_endianness(&dataOut[4], (uint8_t*)&cs48l32_spi_padding, 4);
+		swap_endianness(&dataOut[8], (uint8_t*)&cs48l32_sensory_disable[i][1], 4);
+
+		t.tx_buffer = dataOut;
+
+		ret = spi_device_transmit(g_spi, &t);
+
+		if (dataOut)
+		{
+			free(dataOut);
+			dataOut = NULL;
+		}
+	}
+
+	ESP_LOGE(TAG, "[CS48L32] Sensory disable");
+
+	return ret;
+}
+
 #endif
 
 static void ak_reset(void)
@@ -918,7 +960,9 @@ void app_main()
 	cs_spi_register_write(0, CS48L32_DSP_START_REG, CS48L32_REG_TYPE_DSP_START);
 	vTaskDelay(1000 / portTICK_PERIOD_MS);
 
+#ifndef CTC_CS48L32_SENSORY
 	cs_spi_deinit();
+#endif
 
 	ak_reset();
 	

@@ -40,15 +40,13 @@
 #include "app_ota.h"
 #endif
 
+#include "app_defs.h"
+
 #define SOFTAP_SSID_PREFIX  "ESP-Alexa-"
 
 static const char *TAG = "[app_main]";
 
-#define CTC_REV01 // Jace. 191230. 
-#define CTC_CS48L32 // Jace. 191230. 
-#define CTC_CS48L32_SENSORY // Jace. 200109. Ready Sensory's trigger with CS48L32
-
-#ifdef CTC_REV01
+#if defined(CTC_REV01)
 #define TRI_LED 14
 #define RES_LED 13
 
@@ -64,7 +62,7 @@ static void ctc_led_init(void)
 }
 #endif
 
-#ifdef CTC_CS48L32
+#if defined(CTC_CS48L32)
 #include "esp_spiffs.h"
 #include "wmfwparse.h"
 #include "driver/spi_master.h"
@@ -385,6 +383,7 @@ static const uint32_t cs48l32_dsp_program[CS48L32_DSP_PROGRAM_REG][2] =
 	{0x82BC1000,	0x0}
 };
 
+#if defined(CTC_CS48L32_WMFW_20190826)
 #define CS48L32_DSP_START_REG	(161)
 static const uint32_t cs48l32_dsp_start[CS48L32_DSP_START_REG][2] =
 {
@@ -550,6 +549,219 @@ static const uint32_t cs48l32_dsp_start[CS48L32_DSP_START_REG][2] =
 	{0x342E7A8,	0x0000},
 	{0x342E400,	0x0017}
 };
+#elif defined(CTC_CS48L32_WMFW_12062019)
+#define CS48L32_DSP_START_REG	(207)
+static const uint32_t cs48l32_dsp_start[CS48L32_DSP_START_REG][2] =
+{
+	{0x1700C,	0x0003},
+	{0x17010,	0x0003},
+	{0x17014,	0x0003},
+	{0x17018,	0x0003},
+	{0x1701C,	0x0003},
+	{0x17020,	0x0003},
+	{0x17024,	0x0003},
+	{0x17028,	0x0003},
+	{0x1702C,	0x0003},
+	{0x17030,	0x0003},
+	{0x17034,	0x0003},
+	{0x17038,	0x0003},
+	{0x1703C,	0x0003},
+	{0x17040,	0x0003},
+	{0x17044,	0x0003},
+	{0x17048,	0x0003},
+	{0x1704C,	0x0003},
+	{0x17050,	0x0003},
+	{0x17054,	0x0003},
+	{0x17058,	0x0003},
+	{0x1705C,	0x0003},
+	{0x17060,	0x0003},
+	{0x17064,	0x0003},
+	{0x17068,	0x0003},
+	{0x1706C,	0x0003},
+	{0x17070,	0x0003},
+	{0x17074,	0x0003},
+	{0x17078,	0x0003},
+	{0x1707C,	0x0003},
+	{0x17080,	0x0003},
+	{0x17084,	0x0003},
+	{0x17088,	0x0003},
+	{0x1708C,	0x0003},
+	{0x17090,	0x0003},
+	{0x2BC1000,	0x0001},
+	{0x342F004,	0x000D},
+	{0x342F004,	0x000D},
+	{0x342F004,	0x000A},
+	{0x342F004,	0x000A},
+	{0x342F004,	0x000A},
+	{0x342F004,	0x000A},
+	{0x342F004,	0x000A},
+	{0x342F004,	0x000A},
+	{0x342F004,	0x000A},
+	{0x342F004,	0x000A},
+	{0x342F004,	0x000A},
+	{0x342F004,	0x000A},
+	{0x342F004,	0x000A},
+	{0x342F004,	0x000A},
+	{0x342F004,	0x000A},
+	{0x342F004,	0x000A},
+	{0x342D4A4,	0x000E},
+	{0x342D4A4,	0x000E},
+	{0x342D4A4,	0x0000},
+	{0x342D4A4,	0x0002},
+	{0x342D758,	0x80000},
+	{0x342D4A0,	0x0011},
+	{0x342D75C,	0x80000},
+	{0x342D4A0,	0x0011},
+	{0x342D758,	0x80000},
+	{0x342D4A0,	0x0011},
+	{0x342D75C,	0x80000},
+	{0x342D4A0,	0x0011},
+	{0x342D760,	0x0001},
+	{0x342D4A0,	0x0012},
+	{0x342D764,	0x0001},
+	{0x342D4A0,	0x0012},
+	{0x342D768,	0x0040},
+	{0x342D4A0,	0x0013},
+	{0x342D76C,	0x8000},
+	{0x342D4A0,	0x0013},
+	{0x342D770,	0x0000},
+	{0x342D4A0,	0x0013},
+	{0x342D774,	0x666666},
+	{0x342D4A0,	0x0013},
+	{0x342D760,	0x0001},
+	{0x342D4A0,	0x0012},
+	{0x342D764,	0x0001},
+	{0x342D4A0,	0x0012},
+	{0x342D768,	0x0040},
+	{0x342D4A0,	0x0013},
+	{0x342D76C,	0x8000},
+	{0x342D4A0,	0x0013},
+	{0x342D770,	0x0000},
+	{0x342D4A0,	0x0013},
+	{0x342D774,	0x666666},
+	{0x342D4A0,	0x0013},
+	{0x342D778,	0x0001},
+	{0x342D4A0,	0x0014},
+	{0x342D77C,	0x333333},
+	{0x342D4A0,	0x0014},
+	{0x342D790,	0x1030E},
+	{0x342D4A0,	0x0014},
+	{0x342D794,	0x1062},
+	{0x342D4A0,	0x0014},
+	{0x342D798,	0x1388},
+	{0x342D4A0,	0x0014},
+	{0x342D778,	0x0001},
+	{0x342D4A0,	0x0014},
+	{0x342D77C,	0x333333},
+	{0x342D4A0,	0x0014},
+	{0x342D790,	0x1030E},
+	{0x342D4A0,	0x0014},
+	{0x342D794,	0x1062},
+	{0x342D4A0,	0x0014},
+	{0x342D798,	0x1388},
+	{0x342D4A0,	0x0014},
+	{0x342D780,	0x0001},
+	{0x342D4A0,	0x0014},
+	{0x342D784,	0x0001},
+	{0x342D4A0,	0x0014},
+	{0x342D780,	0x0001},
+	{0x342D4A0,	0x0014},
+	{0x342D784,	0x0001},
+	{0x342D4A0,	0x0014},
+	{0x342D788,	0x0000},
+	{0x342D4A0,	0x0014},
+	{0x342D788,	0x0000},
+	{0x342D4A0,	0x0014},
+	{0x342D79C,	0x0000},
+	{0x342D4A0,	0x0015},
+	{0x342D7A4,	0x2D6A16},
+	{0x342D4A0,	0x0015},
+	{0x342D7A0,	0x2D6A16},
+	{0x342D4A0,	0x0015},
+	{0x342D7AC,	0x2D17C2},
+	{0x342D4A0,	0x0015},
+	{0x342D7A8,	0x404EA},
+	{0x342D4A0,	0x0015},
+	{0x342D79C,	0x0000},
+	{0x342D4A0,	0x0015},
+	{0x342D7A4,	0x2D6A16},
+	{0x342D4A0,	0x0015},
+	{0x342D7A0,	0x2D6A16},
+	{0x342D4A0,	0x0015},
+	{0x342D7AC,	0x2D17C2},
+	{0x342D4A0,	0x0015},
+	{0x342D7A8,	0x404EA},
+	{0x342D4A0,	0x0015},
+	{0x342D7B8,	0x0000},
+	{0x342D4A0,	0x0016},
+	{0x342D7B4,	0x0000},
+	{0x342D4A0,	0x0016},
+	{0x342D7B0,	0x0001},
+	{0x342D4A0,	0x0016},
+	{0x342D7B8,	0x0000},
+	{0x342D4A0,	0x0016},
+	{0x342D7B4,	0x0000},
+	{0x342D4A0,	0x0016},
+	{0x342D7B0,	0x0001},
+	{0x342D4A0,	0x0016},
+	{0x342D7BC,	0x0000},
+	{0x342D7CC,	0x10000},
+	{0x342D7DC,	0x400000},
+	{0x342D7BC,	0x0000},
+	{0x342D7CC,	0x10000},
+	{0x342D7DC,	0x400000},
+	{0x342D7C0,	0x0000},
+	{0x342D7D0,	0x10000},
+	{0x342D7F0,	0x400000},
+	{0x342D7C0,	0x0000},
+	{0x342D7D0,	0x10000},
+	{0x342D7F0,	0x400000},
+	{0x342D7C4,	0x0000},
+	{0x342D7D4,	0x10000},
+	{0x342D804,	0x400000},
+	{0x342D7C4,	0x0000},
+	{0x342D7D4,	0x10000},
+	{0x342D804,	0x400000},
+	{0x342D7C8,	0x0000},
+	{0x342D7D8,	0x10000},
+	{0x342D818,	0x400000},
+	{0x342D7C8,	0x0000},
+	{0x342D7D8,	0x10000},
+	{0x342D818,	0x400000},
+	{0x342D82C,	0x0000},
+	{0x342D4A0,	0x0017},
+	{0x342D830,	0x0000},
+	{0x342D4A0,	0x0017},
+	{0x342D834,	0x0000},
+	{0x342D4A0,	0x0017},
+	{0x342D838,	0x0000},
+	{0x342D4A0,	0x0017},
+	{0x342D83C,	0x0000},
+	{0x342D4A0,	0x0017},
+	{0x342D840,	0x0000},
+	{0x342D4A0,	0x0017},
+	{0x342D844,	0x0000},
+	{0x342D4A0,	0x0017},
+	{0x342D848,	0x0000},
+	{0x342D4A0,	0x0017},
+	{0x342D82C,	0x0000},
+	{0x342D4A0,	0x0017},
+	{0x342D830,	0x0000},
+	{0x342D4A0,	0x0017},
+	{0x342D834,	0x0000},
+	{0x342D4A0,	0x0017},
+	{0x342D838,	0x0000},
+	{0x342D4A0,	0x0017},
+	{0x342D83C,	0x0000},
+	{0x342D4A0,	0x0017},
+	{0x342D840,	0x0000},
+	{0x342D4A0,	0x0017},
+	{0x342D844,	0x0000},
+	{0x342D4A0,	0x0017},
+	{0x342D848,	0x0000},
+	{0x342D4A0,	0x0017}
+};
+#endif
 
 static void swap_endianness(uint8_t* out, uint8_t* in, uint8_t size)
 {
@@ -559,10 +771,11 @@ static void swap_endianness(uint8_t* out, uint8_t* in, uint8_t size)
 	}
 }
 
-#ifdef CTC_CS48L32_SENSORY
+#if defined(CTC_CS48L32_SENSORY)
 esp_err_t cs_spi_sensory_ready(void);
 
 #define CS48L32_SENSORY_READY_REG	(4)
+#if defined(CTC_CS48L32_WMFW_20190826)
 static const uint32_t cs48l32_sensory_ready[CS48L32_SENSORY_READY_REG][2] =
 {
 	{0x82800488,	0x0},
@@ -570,6 +783,15 @@ static const uint32_t cs48l32_sensory_ready[CS48L32_SENSORY_READY_REG][2] =
 	{0x2800480,		0x0020},
 	{0x2800480,		0x0001}
 };
+#elif defined(CTC_CS48L32_WMFW_12062019)
+static const uint32_t cs48l32_sensory_ready[CS48L32_SENSORY_READY_REG][2] =
+{
+	{0x82800450,	0x0},
+	{0x18030,		0x0001},
+	{0x2800448,		0x0020},
+	{0x2800448,		0x0001}
+};
+#endif
 
 esp_err_t cs_spi_sensory_ready(void)
 {
@@ -606,11 +828,19 @@ esp_err_t cs_spi_sensory_ready(void)
 }
 
 #define CS48L32_SENSORY_DISABLE_REG	(2)
+#if defined(CTC_CS48L32_WMFW_20190826)
 static const uint32_t cs48l32_sensory_disable[CS48L32_SENSORY_DISABLE_REG][2] =
 {
 	{0x82800488,	0x0},
 	{0x2800488,		0x0000}
 };
+#elif defined(CTC_CS48L32_WMFW_12062019)
+static const uint32_t cs48l32_sensory_disable[CS48L32_SENSORY_DISABLE_REG][2] =
+{
+	{0x82800450,	0x0},
+	{0x2800450,		0x0000}
+};
+#endif
 
 static esp_err_t cs_spi_sensory_disable(void)
 {
@@ -725,7 +955,11 @@ static esp_err_t cs_spi_firmware_write(void)
 {
 	esp_err_t ret = ESP_OK;
 
+#if defined(CTC_CS48L32_WMFW_20190826)
 	const char *filename = "/spiffs/SCSH_COOKE_20190826.wmfw";
+#elif defined(CTC_CS48L32_WMFW_12062019)
+	const char *filename = "/spiffs/SCSH_COOKE_12062019.wmfw";
+#endif
 
 	// Use settings defined above to initialize and mount SPIFFS filesystem.
 	ctc_spiffs_init();
@@ -787,11 +1021,19 @@ static esp_err_t cs_spi_register_write(uint8_t reg_start, uint8_t reg_end, uint8
 
 	for(uint8_t i = reg_start; i < reg_end; i++)
 	{
+#if defined(CTC_CS48L32_WMFW_20190826)
 		if((reg_type == CS48L32_REG_TYPE_DSP_START) && (i == 107 || i == 110 || i == 113 || i == 116 || i == 119 || i == 122 || i == 125 || i == 128)) // Block write
 		{
 			cs_spi_register_block_write(i);
 		}
 		else
+#elif defined(CTC_CS48L32_WMFW_12062019)
+		if((reg_type == CS48L32_REG_TYPE_DSP_START) && (i == 153 || i == 156 || i == 159 || i == 162 || i == 165 || i == 168 || i == 171 || i == 174)) // Block write
+		{
+			cs_spi_register_block_write(i);
+		}
+		else
+#endif
 		{
 			spi_transaction_t t;
 			memset(&t, 0, sizeof(t));
@@ -933,14 +1175,14 @@ void app_main()
     static media_hal_config_t media_hal_conf = MEDIA_HAL_DEFAULT();
     media_hal_init(&media_hal_conf);
 
-#ifdef CTC_REV01
+#if defined(CTC_REV01)
 	ctc_led_init();
 #else
 	va_board_button_init();
 #endif
     va_board_led_init();
 
-#ifdef CTC_CS48L32
+#if defined(CTC_CS48L32)
 	cs_reset();
 
 	cs_spi_init();
@@ -960,7 +1202,7 @@ void app_main()
 	cs_spi_register_write(0, CS48L32_DSP_START_REG, CS48L32_REG_TYPE_DSP_START);
 	vTaskDelay(1000 / portTICK_PERIOD_MS);
 
-#ifndef CTC_CS48L32_SENSORY
+#if !defined(CTC_CS48L32_SENSORY)
 	cs_spi_deinit();
 #endif
 

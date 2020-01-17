@@ -10,9 +10,9 @@
 #include <va_led.h>
 #include <esp_timer.h>
 
-//#define EN_STACK_MEASUREMENT
+#include "app_defs.h"
 
-#define CTC_CS48L32_SENSORY // Jace. 200109. Ready Sensory's trigger with CS48L32
+//#define EN_STACK_MEASUREMENT
 
 #if defined(CTC_CS48L32_SENSORY)
 extern esp_err_t cs_spi_sensory_ready(void);

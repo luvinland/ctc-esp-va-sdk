@@ -20,7 +20,7 @@
 #include <esp_log.h>
 #include <audio_board.h>
 
-#define CTC_REV01 // Jace. 191231.
+#include "app_defs.h"
 
 #define PLAT_TAG "AUDIO_BOARD"
 
@@ -30,7 +30,7 @@
         return b;\
     }
 
-#ifdef CTC_REV01
+#if defined(CTC_REV01)
 esp_err_t audio_board_i2s_pin_config(int port_num, i2s_pin_config_t *pf_i2s_pin)
 {   
     PLAT_ASSERT(pf_i2s_pin, "Error assigning i2s pins", -1);

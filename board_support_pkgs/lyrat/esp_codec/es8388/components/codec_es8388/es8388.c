@@ -28,7 +28,7 @@
 #include "es8388.h"
 #include <audio_board.h>
 
-#define CTC_REV01 // Jace. 191231.
+#include "app_defs.h"
 
 #define ES_TAG "CODEC_ES8388"
 
@@ -255,7 +255,7 @@ esp_err_t es8388_init(media_hal_config_t *media_hal_conf)
 
     esp_err_t res;
 
-#ifdef CTC_REV01
+#if defined(CTC_REV01)
 	res = ESP_OK;
 #else
     audio_codec_i2c_init(port_num);   //set i2c pin and i2c clock frequency for esp32
@@ -347,7 +347,7 @@ esp_err_t es8388_control_volume(uint8_t volume)
         volume = 100;
     }
 
-#ifdef CTC_REV01
+#if defined(CTC_REV01)
 	res = ESP_OK;
 #else
     res = es8388_read_reg(ES8388_DACCONTROL3, &reg);

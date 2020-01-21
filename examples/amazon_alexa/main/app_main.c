@@ -142,6 +142,9 @@ static const uint32_t cs48l32_spi_padding = 0x0;
 #define CS48L32_REG_TYPE_CONFIG			0
 #define CS48L32_REG_TYPE_DSP_PROGRAM	1
 #define CS48L32_REG_TYPE_DSP_START		2
+#if defined(CTC_CS48L32_FLL_ASP1_BCLK)
+#define CS48L32_REG_TYPE_FLL_CHANGE		3
+#endif
 
 #define CS48L32_CONFIG_REG	(146)
 static const uint32_t cs48l32_config[CS48L32_CONFIG_REG][2] =
@@ -161,7 +164,7 @@ static const uint32_t cs48l32_config[CS48L32_CONFIG_REG][2] =
 	{0xA800,	0x1000},
 	{0x2000,	0x0007},
 	{0x2410,	0x00E7},
-	{0x2418,	0x0223},
+	{0x2418,	0x0223},	// Jace. MICBIAS1A
 	{0x4008,	0x0000},
 	{0x4020,	0x20020},
 	{0x4060,	0x20020},
@@ -763,6 +766,69 @@ static const uint32_t cs48l32_dsp_start[CS48L32_DSP_START_REG][2] =
 };
 #endif
 
+#if defined(CTC_CS48L32_FLL_ASP1_BCLK)
+#define CS48L32_FLL_CHANGE_REG	(56)
+static const uint32_t cs48l32_fll_change[CS48L32_FLL_CHANGE_REG][2] =
+{
+	{0x1C04,	0x88608020},
+	{0x1C08,	0x10000},
+	{0x1C00,	0x0005},
+	{0x1400,	0x0042},
+	{0x1404,	0x0444},
+	{0x1424,	0x0012},
+	{0x1420,	0x0012},
+	{0xA800,	0x1000},
+	{0x2000,	0x0007},
+	{0x2410,	0x00E7},
+	{0x2418,	0x0223},	// Jace. MICBIAS1A
+	{0x4008,	0x0000},
+	{0x4020,	0x20020},
+	{0x4060,	0x20020},
+	{0x4024,	0x0000},
+	{0x4044,	0x0000},
+	{0x4000,	0x0003},
+	{0x4028,	0x8000A6},
+	{0x4048,	0x8000A6},
+	{0xC10,		0xE1000000},
+	{0xC14,		0xE1000000},
+	{0xC18,		0xE1000000},
+	{0xC1C,		0xE1000000},
+	{0xC20,		0xE1000000},
+	{0xC24,		0xE1000000},
+	{0xC28,		0xE1000000},
+	{0xC2C,		0xE1000000},
+	{0x6004,	0x0221},
+	{0x6008,	0x20200200},
+	{0x6040,	0x0010},
+	{0x6030,	0x0010},
+	{0x6000,	0x30003},
+	{0x6084,	0x0221},
+	{0x6088,	0x20200233},
+	{0x60C0,	0x0010},
+	{0x60B0,	0x0010},
+	{0x6080,	0x0003},
+	{0x608C,	0x0000},
+	{0xA400,	0x1000},
+	{0xA404,	0x0C03},
+	{0x8B80,	0x800020},
+	{0x8B84,	0x800021},
+	{0x8300,	0x6E80B8},
+	{0x8310,	0x6E80B8},
+	{0x89C0,	0x00B8},
+	{0x89D0,	0x00B8},
+	{0x9000,	0x80009C},
+	{0x9020,	0x80009D},
+	{0x9040,	0x800010},
+	{0x9050,	0x800011},
+	{0x89A0,	0x0102},
+	{0x89B0,	0x0103},
+	{0x8200,	0x80009A},
+	{0x8210,	0x80009A},	// Jace. 200110. Cirrus's DSP output pin 4 have delay result.
+	{0xA808,	0x0001},
+	{0x4014,	0x20000000}
+};
+#endif
+
 static void swap_endianness(uint8_t* out, uint8_t* in, uint8_t size)
 {
 	for (uint8_t i = 0; i < size; i++)
@@ -876,6 +942,52 @@ static esp_err_t cs_spi_sensory_disable(void)
 	return ret;
 }
 
+#define GPIO_ESP_CS_IRQ		21
+#define GPIO_IRQ_PIN_SEL	(1ULL<<GPIO_ESP_CS_IRQ)
+
+#define ESP_INTR_FLAG_DEFAULT 0
+
+static xQueueHandle gpio_evt_queue = NULL;
+
+static void IRAM_ATTR gpio_isr_handler(void* arg)
+{
+	uint32_t gpio_num = (uint32_t) arg;
+	xQueueSendFromISR(gpio_evt_queue, &gpio_num, NULL);
+}
+
+static void gpio_task_example(void* arg)
+{
+	uint32_t io_num;
+	for(;;) {
+		if(xQueueReceive(gpio_evt_queue, &io_num, portMAX_DELAY)) {
+			ESP_LOGE(TAG, "[CS48L32] Sensory detection triggered.");
+		}
+	}
+}
+
+static void esp_cs_irq_intr_init(void)
+{
+	gpio_config_t io_conf;
+	//interrupt of rising edge
+	io_conf.intr_type = GPIO_PIN_INTR_NEGEDGE;
+	//bit mask of the pins, use GPIO4/5 here
+	io_conf.pin_bit_mask = GPIO_IRQ_PIN_SEL;
+	//set as input mode    
+	io_conf.mode = GPIO_MODE_INPUT;
+	//enable pull-up mode
+	io_conf.pull_up_en = 1;
+	gpio_config(&io_conf);
+
+	//create a queue to handle gpio event from isr
+	gpio_evt_queue = xQueueCreate(10, sizeof(uint32_t));
+	//start gpio task
+	xTaskCreate(gpio_task_example, "gpio_task_example", 2048, NULL, (CONFIG_ESP32_PTHREAD_TASK_PRIO_DEFAULT - 1), NULL);
+
+	//install gpio isr service
+	gpio_install_isr_service(ESP_INTR_FLAG_DEFAULT);
+	//hook isr handler for specific gpio pin
+	gpio_isr_handler_add(GPIO_ESP_CS_IRQ, gpio_isr_handler, (void*) GPIO_ESP_CS_IRQ);
+}
 #endif
 
 static void ak_reset(void)
@@ -969,10 +1081,10 @@ static esp_err_t cs_spi_firmware_write(void)
 	// WMFW file
 	ret = (esp_err_t)ProcessWMFWFile(filename);
 	if (ret != ESP_OK) {
-		ESP_LOGE(TAG, "[ 0 ] process wmfw file error : %d", ret);
+		ESP_LOGE(TAG, "[ 0 ] process %s wmfw file error : %d", filename, ret);
 	}
 	else {
-		ESP_LOGE(TAG, "[ 0 ] process wmfw file success");
+		ESP_LOGE(TAG, "[ 0 ] process %s wmfw file success", filename);
 	}
 
 	free(algorithmIdBlocks);
@@ -1061,6 +1173,18 @@ static esp_err_t cs_spi_register_write(uint8_t reg_start, uint8_t reg_end, uint8
 					swap_endianness(&dataOut[0], (uint8_t*)&cs48l32_dsp_start[i][0], 4);
 					swap_endianness(&dataOut[4], (uint8_t*)&cs48l32_spi_padding, 4);
 					swap_endianness(&dataOut[8], (uint8_t*)&cs48l32_dsp_start[i][1], 4);
+					break;
+
+#if defined(CTC_CS48L32_FLL_ASP1_BCLK)
+				case CS48L32_REG_TYPE_FLL_CHANGE:
+					swap_endianness(&dataOut[0], (uint8_t*)&cs48l32_fll_change[i][0], 4);
+					swap_endianness(&dataOut[4], (uint8_t*)&cs48l32_spi_padding, 4);
+					swap_endianness(&dataOut[8], (uint8_t*)&cs48l32_fll_change[i][1], 4);
+					break;
+#endif
+
+				default:
+					ret = ESP_FAIL;
 					break;
 			}
 
@@ -1202,7 +1326,9 @@ void app_main()
 	cs_spi_register_write(0, CS48L32_DSP_START_REG, CS48L32_REG_TYPE_DSP_START);
 	vTaskDelay(1000 / portTICK_PERIOD_MS);
 
-#if !defined(CTC_CS48L32_SENSORY)
+#if defined(CTC_CS48L32_SENSORY)
+	esp_cs_irq_intr_init();
+#else
 	cs_spi_deinit();
 #endif
 
@@ -1285,6 +1411,12 @@ void app_main()
 
     /* This is a blocking call */
     va_dsp_init(speech_recognizer_recognize, speech_recognizer_record);
+
+#if defined(CTC_CS48L32_FLL_ASP1_BCLK)
+	ESP_LOGE(TAG, "LRCK[%fhz], BCLK changed.", i2s_get_clk(0));
+	cs_spi_register_write(0, CS48L32_FLL_CHANGE_REG, CS48L32_REG_TYPE_FLL_CHANGE);
+	vTaskDelay(100 / portTICK_PERIOD_MS);
+#endif
 
 #ifdef CONFIG_ALEXA_ENABLE_OTA
     /* Doing OTA init after full alexa boot-up. */

@@ -30,6 +30,11 @@ extern "C" {
 */
 #define CTC_CS48L32_WMFW_12062019
 
+/*
+	Jace. 200120. CS48L32's FLL source change from MCLK1 to ASP1_BCLK.
+*/
+#define CTC_CS48L32_FLL_ASP1_BCLK
+
 #ifdef __cplusplus
 }
 #endif

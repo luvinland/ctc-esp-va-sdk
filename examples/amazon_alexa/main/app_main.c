@@ -767,11 +767,12 @@ static const uint32_t cs48l32_dsp_start[CS48L32_DSP_START_REG][2] =
 #endif
 
 #if defined(CTC_CS48L32_FLL_ASP1_BCLK)
-#define CS48L32_FLL_CHANGE_REG	(56)
+#define CS48L32_FLL_CHANGE_REG	(57)
 static const uint32_t cs48l32_fll_change[CS48L32_FLL_CHANGE_REG][2] =
 {
 	{0x1C04,	0x88608020},
 	{0x1C08,	0x10000},
+	{0x1C0C,	0x21F05001},
 	{0x1C00,	0x0005},
 	{0x1400,	0x0042},
 	{0x1404,	0x0444},
@@ -942,8 +943,9 @@ static esp_err_t cs_spi_sensory_disable(void)
 	return ret;
 }
 
+#define GPIO_ESP_SW3		0
 #define GPIO_ESP_CS_IRQ		21
-#define GPIO_IRQ_PIN_SEL	(1ULL<<GPIO_ESP_CS_IRQ)
+#define GPIO_IRQ_PIN_SEL	((1ULL<<GPIO_ESP_SW3) | (1ULL<<GPIO_ESP_CS_IRQ))
 
 #define ESP_INTR_FLAG_DEFAULT 0
 
@@ -958,9 +960,21 @@ static void IRAM_ATTR gpio_isr_handler(void* arg)
 static void gpio_task_example(void* arg)
 {
 	uint32_t io_num;
+	uint8_t toggle = 1;
+
 	for(;;) {
 		if(xQueueReceive(gpio_evt_queue, &io_num, portMAX_DELAY)) {
-			ESP_LOGE(TAG, "[CS48L32] Sensory detection triggered.");
+			if((io_num == 0) && (gpio_get_level(io_num) == 0))
+			{
+				ESP_LOGE(TAG, "[AK4384VT] AMP PDN toggle.");
+				toggle ^= (1 << 0);
+				gpio_set_level(GPIO_AK_PDN, toggle);
+				vTaskDelay(100 / portTICK_PERIOD_MS);
+			}
+			else if((io_num == 21) && (gpio_get_level(io_num) == 0))
+			{
+				ESP_LOGE(TAG, "[CS48L32] Sensory detection triggered.");
+			}
 		}
 	}
 }
@@ -985,6 +999,8 @@ static void esp_cs_irq_intr_init(void)
 
 	//install gpio isr service
 	gpio_install_isr_service(ESP_INTR_FLAG_DEFAULT);
+	//hook isr handler for specific gpio pin
+	gpio_isr_handler_add(GPIO_ESP_SW3, gpio_isr_handler, (void*) GPIO_ESP_SW3);
 	//hook isr handler for specific gpio pin
 	gpio_isr_handler_add(GPIO_ESP_CS_IRQ, gpio_isr_handler, (void*) GPIO_ESP_CS_IRQ);
 }

@@ -1,4 +1,4 @@
-# CTC (Cloud Type CirrusLogic): Cloud amazon alexa and audio preprocessing with sensory trigger.
+# CTC (Cloud Type CirrusLogic): Cloud amazon alexa and audio pre-processing DSP with sensory trigger.
 
 ## Overview
 Espressif's amazon alexa app project based on [esp-va-sdk](https://github.com/espressif/esp-va-sdk) for AVS and H/W audio pre-processor Cirrus Logic CS48L32 with Sensory trigger.
@@ -10,4 +10,4 @@ Espressif's amazon alexa app project based on [esp-va-sdk](https://github.com/es
 
 ## Hardware
 * WiFi & BT SoC : [Espressif ESP32](https://www.espressif.com/en/products/hardware/esp32/overview)
-* Audio pre-processing SoC : [Cirrus Logic CS48L32](https://www.cirrus.com/products/cs48l32/)
+* Audio pre-processing DSP : [Cirrus Logic CS48L32](https://www.cirrus.com/products/cs48l32/)

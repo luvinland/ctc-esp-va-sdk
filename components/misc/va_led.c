@@ -14,6 +14,11 @@
 
 //#define EN_STACK_MEASUREMENT
 
+#if defined(CTC_REV01)
+#define TRI_LED 14
+#define RES_LED 13
+#endif
+
 #if defined(CTC_CS48L32_SENSORY)
 extern esp_err_t cs_spi_sensory_ready(void);
 #endif
@@ -171,6 +176,10 @@ static void va_led_task(void *arg)
                     va_led_tick = portMAX_DELAY;
                 break;
                 case VA_IDLE :
+#if defined(CTC_REV01)
+					gpio_set_level(TRI_LED, 1);
+					gpio_set_level(RES_LED, 1);
+#endif
 #if defined(CTC_CS48L32_SENSORY)
 					cs_spi_sensory_ready();
 #endif
@@ -212,6 +221,9 @@ static void va_led_task(void *arg)
                     }
                 break;
                 case VA_LISTENING :
+#if defined(CTC_REV01)
+					gpio_set_level(TRI_LED, 0);
+#endif
                     va_led_listening_end_flag = true;
                     if (va_led_listen_on_going == false && !(va_led_con[VA_LED_WW_ACTIVE].va_led_state_st->loop_en)) {
                         va_led_set_state(va_led_con[VA_LED_WW_ACTIVE].va_led_state_sz, va_led_con[VA_LED_WW_ACTIVE].va_led_state_st);
@@ -244,6 +256,10 @@ static void va_led_task(void *arg)
                     va_led_tick = 0;
                 break;
                 case VA_SPEAKING :
+#if defined(CTC_REV01)
+					gpio_set_level(TRI_LED, 1);
+					gpio_set_level(RES_LED, 0);
+#endif
                     va_led_listening_end_flag = true;
                     va_led_listen_on_going = false;
                     if (va_led_alert_short_en) {

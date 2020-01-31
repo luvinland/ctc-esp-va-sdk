@@ -1,2 +1,3 @@
 *.bak
 examples/amazon_alexa/build/*
+examples/google_voice_assistant/build/*

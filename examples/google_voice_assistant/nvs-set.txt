@@ -1,0 +1,4 @@
+nvs-set refreshToken string "1//0eJOXb8xDJ0c4CgYIARAAGA4SNwF-L9Irv7mw1eT0x_gX1ILh4OPB8ilzwT2D76rz0WcTQIuYYjhfmMizW7FNF5Sx-V23SPAicgU"
+nvs-set clientId string "43230792648-58uu0itvuf2nnaju19ofadgc6pe3m7uq.apps.googleusercontent.com"
+nvs-set clientSecret string "mB6dqNLnDm-rpQGi3DbhR7X0"
+wifi-set "Jace Lee's iPhone" "01028229351"

@@ -18,6 +18,8 @@
 #include <va_dsp.h>
 #include <lyrat_init.h>
 
+#include "app_defs.h"
+
 #define WWE_TASK_STACK (8 * 1024)
 #define RB_TASK_STACK (8 * 1024)
 #define RB_SIZE (4 * 1024)
@@ -182,6 +184,8 @@ void lyrat_init()
     audio_stream_start(&dd.read_i2s_stream->base);
     dd.detect_wakeword = true;
 
+#if !defined(CTC_GVA_CS48L32)
     xTaskCreate(&ww_detection_task, "nn", WWE_TASK_STACK, NULL, (CONFIG_ESP32_PTHREAD_TASK_PRIO_DEFAULT - 1), &dd.ww_detection_task_handle);
+#endif
     xTaskCreate(&resample_rb_data_task, "rb read task", RB_TASK_STACK, NULL, (CONFIG_ESP32_PTHREAD_TASK_PRIO_DEFAULT - 1), NULL);
 }

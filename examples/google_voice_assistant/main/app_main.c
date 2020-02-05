@@ -954,6 +954,9 @@ static void gpio_task_example(void* arg)
 			else if((io_num == 21) && (gpio_get_level(io_num) == 0))
 			{
 				ESP_LOGE(TAG, "[CS48L32] Sensory detection triggered.");
+#if defined(CTC_GVA_CS48L32)
+				va_dsp_tap_to_talk_start();
+#endif
 			}
 		}
 	}

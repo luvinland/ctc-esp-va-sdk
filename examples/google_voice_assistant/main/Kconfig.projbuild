@@ -7,4 +7,16 @@ config VOICE_ASSISTANT_TASK_LIST
     help
         Prints all the tasks which are running as well as blocked.
 
+config DEVICE_MODEL
+    string "DEVICE_MODEL"
+	default "device-model-default"
+	help
+		Device model for the example to connect gva.
+
+config DEVICE_ID
+    string "DEVICE_ID"
+	default "device-id-default"
+	help
+		Device ID (unique) for the example to use.
+
 endmenu

@@ -35,6 +35,11 @@ extern "C" {
 */
 #define CTC_CS48L32_FLL_ASP1_BCLK
 
+/*
+	Jace. 200206. Add Json parser for ASK.
+*/
+#define CTC_CS48L32_ASK
+
 #ifdef __cplusplus
 }
 #endif

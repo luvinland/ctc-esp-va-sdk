@@ -20,6 +20,14 @@
 #include <jsmn-changed.h>
 #include <json_parser.h>
 
+#include "app_defs.h"
+
+#if defined(CTC_CS48L32_ASK)
+#include <esp_log.h>
+
+static const char *TAG = "[json_components]";
+#endif
+
 static bool token_matches_str(jparse_ctx_t *ctx, json_tok_t *tok, char *str)
 {
     char *js = ctx->js;
@@ -91,10 +99,63 @@ static int json_tok_to_float(jparse_ctx_t *jctx, json_tok_t *tok, float *val)
 
 static int json_tok_to_string(jparse_ctx_t *jctx, json_tok_t *tok, char *val, int size)
 {
+#if defined(CTC_CS48L32_ASK)
+	char *power_off 	= "cid:ValidatedSpeakDirective_amzn1.ask.skill.a7241fa8-11b5-49df-902e-baced357d257";
+	char *power_on		= "cid:ValidatedSpeakDirective_amzn1.ask.skill.b33fccff-ecc2-4e3d-bddf-4608e97b6520";
+	char *step_one		= "cid:ValidatedSpeakDirective_amzn1.ask.skill.ba975a23-1a94-4e9b-a63f-d2f96ee6b4fd";
+	char *step_two		= "cid:ValidatedSpeakDirective_amzn1.ask.skill.c9f80039-1984-41ee-ade7-1f642c90d42a";
+	char *step_three	= "cid:ValidatedSpeakDirective_amzn1.ask.skill.cd696c5b-aeb7-41df-a2ec-2e3400d5a662";
+	char *one_hour		= "cid:ValidatedSpeakDirective_amzn1.ask.skill.1432836d-53a0-4af5-96ab-dc21ae126831";
+	char *four_hours	= "cid:ValidatedSpeakDirective_amzn1.ask.skill.02407480-15e2-4b1f-a663-3d7d835c5b50";
+	char *eight_hours	= "cid:ValidatedSpeakDirective_amzn1.ask.skill.a7e34dcd-8204-4265-857e-1dd64e7a1892";
+	char *ai_mode		= "cid:ValidatedSpeakDirective_amzn1.ask.skill.ebf1f4d7-5407-4705-a2b2-e13eb0b1b1c6";
+#endif
+
     if ((tok->end - tok->start) > (size - 1)) {
         return -OS_FAIL;
     }
     strncpy(val, jctx->js + tok->start, tok->end - tok->start);
+
+#if defined(CTC_CS48L32_ASK)
+	//ESP_LOGE(TAG, "len=[%d] string=[%s]\n", (tok->end - tok->start), val);
+	if(strstr(val, power_off))
+	{
+		ESP_LOGE(TAG, "power_off, to do...\n");
+	}
+	else if(strstr(val, power_on))
+	{
+		ESP_LOGE(TAG, "power_on, to do...\n");
+	}
+	else if(strstr(val, step_one))
+	{
+		ESP_LOGE(TAG, "step_one, to do...\n");
+	}
+	else if(strstr(val, step_two))
+	{
+		ESP_LOGE(TAG, "step_two, to do...\n");
+	}
+	else if(strstr(val, step_three))
+	{
+		ESP_LOGE(TAG, "step_three, to do...\n");
+	}
+	else if(strstr(val, one_hour))
+	{
+		ESP_LOGE(TAG, "one_hour, to do...\n");
+	}
+	else if(strstr(val, four_hours))
+	{
+		ESP_LOGE(TAG, "four_hours, to do...\n");
+	}
+	else if(strstr(val, eight_hours))
+	{
+		ESP_LOGE(TAG, "eight_hours, to do...\n");
+	}
+	else if(strstr(val, ai_mode))
+	{
+		ESP_LOGE(TAG, "ai_mode, to do...\n");
+	}
+#endif
+
     val[tok->end - tok->start] = 0;
     return OS_SUCCESS;
 }

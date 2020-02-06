@@ -1370,8 +1370,8 @@ void app_main()
     }
 
 #if defined(CTC_GVA_CS48L32)
-	va_cfg->device_config.device_model		= "gvaforctc-gvaforctc-dev-krkx0u";
-	va_cfg->device_config.device_id			= "19b4a1c6-4327-11ea-accd-0800278eb046";
+	va_cfg->device_config.device_model		= "";
+	va_cfg->device_config.device_id			= "";
 	va_cfg->device_config.device_language	= "ko-KR";
 #else
     va_cfg->device_config.device_model = "device-model-default";    // Enter your model id (name) here

@@ -1370,9 +1370,9 @@ void app_main()
     }
 
 #if defined(CTC_GVA_CS48L32)
-	va_cfg->device_config.device_model		= "";
-	va_cfg->device_config.device_id			= "";
-	va_cfg->device_config.device_language	= "ko-KR";
+	va_cfg->device_config.device_model		= CONFIG_DEVICE_MODEL;
+	va_cfg->device_config.device_id			= CONFIG_DEVICE_ID;
+	va_cfg->device_config.device_language	= CONFIG_DEVICE_LANG;
 #else
     va_cfg->device_config.device_model = "device-model-default";    // Enter your model id (name) here
     va_cfg->device_config.device_id = "device-id-default";          // Enter your (unique) device id here
@@ -1386,7 +1386,7 @@ void app_main()
     va_dsp_init(speech_recognizer_recognize, speech_recognizer_record);
 
 #if defined(CTC_CS48L32_FLL_ASP1_BCLK)
-	ESP_LOGE(TAG, "LRCK[%fhz], BCLK changed.", i2s_get_clk(0));
+	ESP_LOGE(TAG, "BCLK changed.");
 	cs_spi_register_write(0, CS48L32_FLL_CHANGE_REG, CS48L32_REG_TYPE_FLL_CHANGE);
 	vTaskDelay(100 / portTICK_PERIOD_MS);
 #endif

@@ -1429,7 +1429,7 @@ void app_main()
     va_dsp_init(speech_recognizer_recognize, speech_recognizer_record);
 
 #if defined(CTC_CS48L32_FLL_ASP1_BCLK)
-	ESP_LOGE(TAG, "LRCK[%fhz], BCLK changed.", i2s_get_clk(0));
+	ESP_LOGE(TAG, "BCLK changed.");
 	cs_spi_register_write(0, CS48L32_FLL_CHANGE_REG, CS48L32_REG_TYPE_FLL_CHANGE);
 	vTaskDelay(100 / portTICK_PERIOD_MS);
 #endif

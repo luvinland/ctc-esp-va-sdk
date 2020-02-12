@@ -946,6 +946,7 @@ static esp_err_t cs_spi_sensory_disable(void)
 
 	return ret;
 }
+#endif
 
 #define GPIO_ESP_SW3		0
 #define GPIO_ESP_CS_IRQ		21
@@ -1008,7 +1009,6 @@ static void esp_cs_irq_intr_init(void)
 	//hook isr handler for specific gpio pin
 	gpio_isr_handler_add(GPIO_ESP_CS_IRQ, gpio_isr_handler, (void*) GPIO_ESP_CS_IRQ);
 }
-#endif
 
 static void ak_reset(void)
 {
@@ -1545,9 +1545,9 @@ void app_main()
 	cs_spi_register_write(0, CS48L32_DSP_START_REG, CS48L32_REG_TYPE_DSP_START);
 	vTaskDelay(1000 / portTICK_PERIOD_MS);
 
-#if defined(CTC_CS48L32_SENSORY)
 	esp_cs_irq_intr_init();
-#else
+
+#if !defined(CTC_CS48L32_SENSORY)
 	cs_spi_deinit();
 #endif
 

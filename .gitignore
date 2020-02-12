@@ -5,4 +5,3 @@ examples/amazon_alexa/wmfw/*
 examples/google_voice_assistant/build/*
 examples/google_voice_assistant/wmfw/*
 sdkconfig
-sdkconfig.

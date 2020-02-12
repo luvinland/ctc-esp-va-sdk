@@ -42,6 +42,10 @@
 
 #include "app_defs.h"
 
+#if defined(BLYNK_APPS)
+#include "blynk.h"
+#endif
+
 #define SOFTAP_SSID_PREFIX  "ESP-Alexa-"
 
 static const char *TAG = "[app_main]";
@@ -1226,6 +1230,205 @@ static esp_err_t cs_spi_register_write(uint8_t reg_start, uint8_t reg_end, uint8
 }
 #endif
 
+#if defined(BLYNK_APPS)
+#define POWEROFF	0x0
+#define POWERON		0x1
+#define STEP1		0x2
+#define STEP2		0x3
+#define STEP3		0x4
+
+#define BLY_VENT_POWER 10
+#define BLY_VENT_STEP1 11
+#define BLY_VENT_STEP2 12
+#define BLY_VENT_STEP3 13
+
+extern bool vent_power_on;
+extern uint8_t vent_step;
+
+extern uint8_t	_binary_00_bin_start, _binary_00_bin_end, _binary_01_bin_start, _binary_01_bin_end, _binary_02_bin_start, _binary_02_bin_end, _binary_03_bin_start, _binary_03_bin_end,
+				_binary_04_bin_start, _binary_04_bin_end;
+
+static esp_err_t blynk_tone_play(uint8_t cmd)
+{
+	int res = 0;
+
+	media_hal_audio_info_t bin_info = {0};
+
+	bin_info.sample_rate = 16000;
+	bin_info.channels = 1;
+	bin_info.bits_per_sample = 16;
+
+	switch(cmd)
+	{
+		case POWEROFF:
+			res = tone_play_custom(&_binary_00_bin_start, &_binary_00_bin_end, &bin_info);
+			break;
+		case POWERON:
+			res = tone_play_custom(&_binary_01_bin_start, &_binary_01_bin_end, &bin_info);
+			break;
+		case STEP1:
+			res = tone_play_custom(&_binary_02_bin_start, &_binary_02_bin_end, &bin_info);
+			break;
+		case STEP2:
+			res = tone_play_custom(&_binary_03_bin_start, &_binary_03_bin_end, &bin_info);
+			break;
+		case STEP3:
+			res = tone_play_custom(&_binary_04_bin_start, &_binary_04_bin_end, &bin_info);
+			break;
+		
+	}
+
+	if(res != ESP_OK)
+	{
+		ESP_LOGE(TAG, "Error tone play.");
+	}
+	return res;
+}
+
+/* Blynk client state handler */
+static void state_handler(blynk_client_t *c, const blynk_state_evt_t *ev, void *data) {
+	ESP_LOGI(TAG, "state: %d\n", ev->state);
+}
+
+/* Virtual write handler */
+static void vw_handler(blynk_client_t *c, uint16_t id, const char *cmd, int argc, char **argv, void *data)
+{
+	if (argc > 1)
+	{
+		switch(atoi(argv[0]))
+		{
+			case BLY_VENT_POWER:
+				if(!atoi(argv[1]))
+				{
+					blynk_send(c, BLYNK_CMD_HARDWARE, 0, "sii", "vw", BLY_VENT_STEP1, 0);
+					blynk_send(c, BLYNK_CMD_HARDWARE, 0, "sii", "vw", BLY_VENT_STEP2, 0);
+					blynk_send(c, BLYNK_CMD_HARDWARE, 0, "sii", "vw", BLY_VENT_STEP3, 0);
+					vent_step = 0;
+				}
+				vent_power_on = atoi(argv[1]);
+				blynk_tone_play(atoi(argv[1]));
+				break;
+			case BLY_VENT_STEP1:
+				if(atoi(argv[1]))
+				{
+					blynk_send(c, BLYNK_CMD_HARDWARE, 0, "sii", "vw", BLY_VENT_STEP2, 0);
+					blynk_send(c, BLYNK_CMD_HARDWARE, 0, "sii", "vw", BLY_VENT_STEP3, 0);
+					blynk_tone_play(STEP1);
+					vent_step = BLY_VENT_STEP1;
+				}
+				break;
+			case BLY_VENT_STEP2:
+				if(atoi(argv[1]))
+				{
+					blynk_send(c, BLYNK_CMD_HARDWARE, 0, "sii", "vw", BLY_VENT_STEP1, 0);
+					blynk_send(c, BLYNK_CMD_HARDWARE, 0, "sii", "vw", BLY_VENT_STEP3, 0);
+					blynk_tone_play(STEP2);
+					vent_step = BLY_VENT_STEP2;
+				}
+				break;
+			case BLY_VENT_STEP3:
+				if(atoi(argv[1]))
+				{
+					blynk_send(c, BLYNK_CMD_HARDWARE, 0, "sii", "vw", BLY_VENT_STEP1, 0);
+					blynk_send(c, BLYNK_CMD_HARDWARE, 0, "sii", "vw", BLY_VENT_STEP2, 0);
+					blynk_tone_play(STEP3);
+					vent_step = BLY_VENT_STEP3;
+				}
+				break;
+		}
+	}
+}
+
+uint8_t prev_pw_value = 0;
+uint8_t prev_step_value = 0;
+
+/* Virtual read handler */
+static void vr_handler(blynk_client_t *c, uint16_t id, const char *cmd, int argc, char **argv, void *data)
+{
+	if (!argc) {
+		return;
+	}
+
+	int pin = atoi(argv[0]);
+
+	if(pin == BLY_VENT_POWER)
+	{
+		uint8_t pw_value = (uint8_t)vent_power_on;
+		uint8_t step_value = vent_step;
+
+		if(prev_pw_value != pw_value)
+		{
+			/* Respond with `virtual write' command */
+			blynk_send(c, BLYNK_CMD_HARDWARE, 0, "sii", "vw", BLY_VENT_POWER, pw_value);
+			if(!pw_value)
+			{
+				blynk_send(c, BLYNK_CMD_HARDWARE, 0, "sii", "vw", BLY_VENT_STEP1, 0);
+				blynk_send(c, BLYNK_CMD_HARDWARE, 0, "sii", "vw", BLY_VENT_STEP2, 0);
+				blynk_send(c, BLYNK_CMD_HARDWARE, 0, "sii", "vw", BLY_VENT_STEP3, 0);
+			}
+		}
+		prev_pw_value = pw_value;
+
+		if(prev_step_value != step_value)
+		{
+			switch(step_value)
+			{
+				case BLY_VENT_STEP1:
+					blynk_send(c, BLYNK_CMD_HARDWARE, 0, "sii", "vw", BLY_VENT_STEP1, 1);
+					blynk_send(c, BLYNK_CMD_HARDWARE, 0, "sii", "vw", BLY_VENT_STEP2, 0);
+					blynk_send(c, BLYNK_CMD_HARDWARE, 0, "sii", "vw", BLY_VENT_STEP3, 0);
+					break;
+				case BLY_VENT_STEP2:
+					blynk_send(c, BLYNK_CMD_HARDWARE, 0, "sii", "vw", BLY_VENT_STEP1, 0);
+					blynk_send(c, BLYNK_CMD_HARDWARE, 0, "sii", "vw", BLY_VENT_STEP2, 1);
+					blynk_send(c, BLYNK_CMD_HARDWARE, 0, "sii", "vw", BLY_VENT_STEP3, 0);
+					break;
+				case BLY_VENT_STEP3:
+					blynk_send(c, BLYNK_CMD_HARDWARE, 0, "sii", "vw", BLY_VENT_STEP1, 0);
+					blynk_send(c, BLYNK_CMD_HARDWARE, 0, "sii", "vw", BLY_VENT_STEP2, 0);
+					blynk_send(c, BLYNK_CMD_HARDWARE, 0, "sii", "vw", BLY_VENT_STEP3, 1);
+					break;
+				default:
+					blynk_send(c, BLYNK_CMD_HARDWARE, 0, "sii", "vw", BLY_VENT_STEP1, 0);
+					blynk_send(c, BLYNK_CMD_HARDWARE, 0, "sii", "vw", BLY_VENT_STEP2, 0);
+					blynk_send(c, BLYNK_CMD_HARDWARE, 0, "sii", "vw", BLY_VENT_STEP3, 0);
+					
+			}
+		}
+		prev_step_value = step_value;
+		
+	}
+}
+
+static void esp_blynk_apps(void)
+{
+	blynk_err_t ret;
+
+	blynk_client_t *client = malloc(sizeof(blynk_client_t));
+	blynk_init(client);
+
+	blynk_options_t opt = {
+		.token = CONFIG_BLYNK_TOKEN,
+		.server = CONFIG_BLYNK_SERVER,
+		/* Use default timeouts */
+	};
+
+	blynk_set_options(client, &opt);
+
+	/* Subscribe to state changes and errors */
+	blynk_set_state_handler(client, state_handler, NULL);
+
+	/* blynk_set_handler sets hardware (BLYNK_CMD_HARDWARE) command handler */
+	blynk_set_handler(client, "vw", vw_handler, NULL);
+	blynk_set_handler(client, "vr", vr_handler, NULL);
+
+	/* Start Blynk client task */
+	ret = blynk_start(client);
+	ESP_LOGI(TAG, "blynk_start ret[%d]", ret);
+}
+#endif
+
+
 static EventGroupHandle_t cm_event_group;
 const int CONNECTED_BIT = BIT0;
 const int PROV_DONE_BIT = BIT1;
@@ -1432,6 +1635,10 @@ void app_main()
 	ESP_LOGE(TAG, "BCLK changed.");
 	cs_spi_register_write(0, CS48L32_FLL_CHANGE_REG, CS48L32_REG_TYPE_FLL_CHANGE);
 	vTaskDelay(100 / portTICK_PERIOD_MS);
+#endif
+
+#if defined(BLYNK_APPS)
+	esp_blynk_apps();
 #endif
 
 #ifdef CONFIG_ALEXA_ENABLE_OTA

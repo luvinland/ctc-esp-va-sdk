@@ -40,6 +40,11 @@ extern "C" {
 */
 #define CTC_CS48L32_ASK
 
+/*
+	Jace. 200210. Add blynk's App. function.
+*/
+#define BLYNK_APPS
+
 #ifdef __cplusplus
 }
 #endif

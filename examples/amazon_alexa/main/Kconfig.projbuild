@@ -44,4 +44,18 @@ config ALEXA_ENABLE_AWS_IOT
     help
         Enables the AWS-IoT additional component. The wake-word count can be seen on the AWS-IoT console
 
+config BLYNK_TOKEN
+    string "Blynk token"
+	default "token"
+	help
+		Blynk access token
+
+config BLYNK_SERVER
+    string "Blynk server"
+	default ""
+	help
+		Customize Blynk server address
+
+		Syntax: domain:port
+
 endmenu

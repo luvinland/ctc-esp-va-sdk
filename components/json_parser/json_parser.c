@@ -28,6 +28,11 @@
 static const char *TAG = "[json_components]";
 #endif
 
+#if defined(BLYNK_APPS)
+bool vent_power_on = false;
+uint8_t vent_step = 0;
+#endif
+
 static bool token_matches_str(jparse_ctx_t *ctx, json_tok_t *tok, char *str)
 {
     char *js = ctx->js;
@@ -121,22 +126,37 @@ static int json_tok_to_string(jparse_ctx_t *jctx, json_tok_t *tok, char *val, in
 	if(strstr(val, power_off))
 	{
 		ESP_LOGE(TAG, "power_off, to do...\n");
+#if defined(BLYNK_APPS)
+		vent_power_on = false;
+#endif
 	}
 	else if(strstr(val, power_on))
 	{
 		ESP_LOGE(TAG, "power_on, to do...\n");
+#if defined(BLYNK_APPS)
+		vent_power_on = true;
+#endif
 	}
 	else if(strstr(val, step_one))
 	{
 		ESP_LOGE(TAG, "step_one, to do...\n");
+#if defined(BLYNK_APPS)
+		vent_step = 11;
+#endif
 	}
 	else if(strstr(val, step_two))
 	{
 		ESP_LOGE(TAG, "step_two, to do...\n");
+#if defined(BLYNK_APPS)
+		vent_step = 12;
+#endif
 	}
 	else if(strstr(val, step_three))
 	{
 		ESP_LOGE(TAG, "step_three, to do...\n");
+#if defined(BLYNK_APPS)
+		vent_step = 13;
+#endif
 	}
 	else if(strstr(val, one_hour))
 	{

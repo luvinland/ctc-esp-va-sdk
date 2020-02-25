@@ -45,6 +45,16 @@ extern "C" {
 */
 #define BLYNK_APPS
 
+/*
+	Jace. 200213. Using SENSORY's trigger.
+*/
+#define CTC_CS48L32_SENSORY_TRIGGER
+
+/*
+	Jace. 200225. Apply 1st tunning data for CS48L32.
+*/
+#define CTC_CS48L32_TUNE_1ST
+
 #ifdef __cplusplus
 }
 #endif

@@ -55,6 +55,11 @@ extern "C" {
 */
 #define CTC_CS48L32_TUNE_1ST
 
+/*
+	Jace. 200225. Check CS48L32's register.
+*/
+#define CTC_CS48L32_CHECK_REGx
+
 #ifdef __cplusplus
 }
 #endif

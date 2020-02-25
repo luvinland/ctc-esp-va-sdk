@@ -151,6 +151,9 @@ static const uint32_t cs48l32_spi_padding = 0x0;
 #if defined(CTC_CS48L32_FLL_ASP1_BCLK)
 #define CS48L32_REG_TYPE_FLL_CHANGE		4
 #endif
+#if defined(CTC_CS48L32_CHECK_REG)
+#define CS48L32_REG_TYPE_CHECK_REG		5
+#endif
 #else
 #define CS48L32_REG_TYPE_CONFIG			0
 #define CS48L32_REG_TYPE_DSP_PROGRAM	1
@@ -1106,6 +1109,18 @@ static const uint32_t cs48l32_fll_change[CS48L32_FLL_CHANGE_REG][2] =
 };
 #endif
 
+#if defined(CTC_CS48L32_CHECK_REG)
+#define CS48L32_CHECK_REG	(5)
+static const uint32_t cs48l32_check_reg[CS48L32_CHECK_REG][2] =
+{
+	{0x8342D5B0,	0x0},
+	{0x8342D75C,	0x0},
+	{0x8342D76C,	0x0},
+	{0x8342D770,	0x0},
+	{0x8342F09C,	0x0},
+};
+#endif
+
 static void swap_endianness(uint8_t* out, uint8_t* in, uint8_t size)
 {
 	for (uint8_t i = 0; i < size; i++)
@@ -1486,6 +1501,13 @@ static esp_err_t cs_spi_register_write(uint8_t reg_start, uint8_t reg_end, uint8
 					break;
 #endif
 
+#if defined(CTC_CS48L32_CHECK_REG)
+				case CS48L32_REG_TYPE_CHECK_REG:
+					swap_endianness(&dataOut[0], (uint8_t*)&cs48l32_check_reg[i][0], 4);
+					swap_endianness(&dataOut[4], (uint8_t*)&cs48l32_spi_padding, 4);
+					swap_endianness(&dataOut[8], (uint8_t*)&cs48l32_check_reg[i][1], 4);
+					break;
+#endif
 				default:
 					ret = ESP_FAIL;
 					break;
@@ -1918,6 +1940,11 @@ void app_main()
 #if defined(CTC_CS48L32_FLL_ASP1_BCLK)
 	ESP_LOGE(TAG, "BCLK changed.");
 	cs_spi_register_write(0, CS48L32_FLL_CHANGE_REG, CS48L32_REG_TYPE_FLL_CHANGE);
+	vTaskDelay(100 / portTICK_PERIOD_MS);
+#endif
+
+#if defined(CTC_CS48L32_CHECK_REG)
+	cs_spi_register_write(0, CS48L32_CHECK_REG, CS48L32_REG_TYPE_CHECK_REG);
 	vTaskDelay(100 / portTICK_PERIOD_MS);
 #endif
 

@@ -51,6 +51,9 @@ static void ww_detection_task(void *arg)
 {
     int frequency = esp_wwe_get_sample_rate();
     int audio_chunksize = esp_wwe_get_sample_chunksize();
+#if defined(CTC_TRIGGER_TEST)
+	uint32_t trigger_count = 0;
+#endif
 
     int16_t *buffer = malloc(audio_chunksize*sizeof(int16_t));
     assert(buffer);
@@ -62,7 +65,12 @@ static void ww_detection_task(void *arg)
             int r = esp_wwe_detect(buffer);
             if (r && dd.detect_wakeword) {
                 int new_ms = (chunks*audio_chunksize*1000)/frequency;
+#if defined(CTC_TRIGGER_TEST)
+				trigger_count++;
+                ESP_LOGE(TAG, "[ESP32] triggered. Count[%d]", trigger_count);
+#else
                 ESP_LOGE(TAG, "%.2f: Neural network detection triggered output %d.", (float)new_ms/1000.0, r);
+#endif
                 int x = (new_ms - priv_ms);
                 priv_ms = new_ms;
                 if(x != 20) {

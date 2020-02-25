@@ -60,6 +60,11 @@ extern "C" {
 */
 #define CTC_CS48L32_CHECK_REGx
 
+/*
+	Jace. 200225. Only trigger test.
+*/
+#define CTC_TRIGGER_TEST
+
 #ifdef __cplusplus
 }
 #endif

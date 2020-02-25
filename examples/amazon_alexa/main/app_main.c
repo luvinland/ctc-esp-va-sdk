@@ -1253,6 +1253,9 @@ static void gpio_task_example(void* arg)
 {
 	uint32_t io_num;
 	uint8_t toggle = 1;
+#if defined(CTC_TRIGGER_TEST)
+	uint32_t trigger_count = 0;
+#endif
 
 	for(;;) {
 		if(xQueueReceive(gpio_evt_queue, &io_num, portMAX_DELAY)) {
@@ -1265,9 +1268,16 @@ static void gpio_task_example(void* arg)
 			}
 			else if((io_num == 21) && (gpio_get_level(io_num) == 0))
 			{
+#if defined(CTC_CS48L32_SENSORY_TRIGGER)
+#if defined(CTC_TRIGGER_TEST)
+				trigger_count++;
+				ESP_LOGE(TAG, "[CS48L32] Sensory detection triggered. Count[%d]", trigger_count);
+				vTaskDelay(100 / portTICK_PERIOD_MS);
+				cs_spi_sensory_ready();
+#else
 				ESP_LOGE(TAG, "[CS48L32] Sensory detection triggered.");
-#if defined (CTC_CS48L32_SENSORY_TRIGGER)
 				va_dsp_tap_to_talk_start();
+#endif
 #endif
 			}
 		}

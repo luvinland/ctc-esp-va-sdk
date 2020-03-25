@@ -46,6 +46,10 @@
 #include "blynk.h"
 #endif
 
+#if defined(FACTORY_RESET)
+#include "va_nvs_utils.h"
+#endif
+
 #define SOFTAP_SSID_PREFIX  "ESP-Alexa-"
 
 static const char *TAG = "[app_main]";
@@ -1747,6 +1751,9 @@ static void esp_blynk_apps(void)
 static EventGroupHandle_t cm_event_group;
 const int CONNECTED_BIT = BIT0;
 const int PROV_DONE_BIT = BIT1;
+#if defined(FACTORY_RESET)
+uint8_t reset_counter = 0;
+#endif
 
 static esp_err_t event_handler(void *ctx, system_event_t *event)
 {
@@ -1759,6 +1766,9 @@ static esp_err_t event_handler(void *ctx, system_event_t *event)
         break;
     case SYSTEM_EVENT_STA_CONNECTED:
         // We already have print in SYSTEM_EVENT_STA_GOT_IP
+#if defined(FACTORY_RESET)
+		reset_counter = 0;
+#endif
         break;
     case SYSTEM_EVENT_STA_GOT_IP:
         app_wifi_stop_timeout_timer();
@@ -1771,8 +1781,23 @@ static esp_err_t event_handler(void *ctx, system_event_t *event)
     case SYSTEM_EVENT_STA_WPS_ER_FAILED:
     case SYSTEM_EVENT_STA_WPS_ER_TIMEOUT:
         app_wifi_stop_timeout_timer();
+#if defined(FACTORY_RESET)
+		printf("%s: Disconnected. Event: %d. Connecting to the AP again Try %d\n", TAG, event->event_id, reset_counter++);
+		if(reset_counter < 20)
+			esp_wifi_connect();
+		else
+		{
+			reset_counter = 0;
+
+			va_led_set(LED_OFF);
+			va_nvs_flash_erase();
+			va_reset();
+			esp_restart();
+		}
+#else
         printf("%s: Disconnected. Event: %d. Connecting to the AP again\n", TAG, event->event_id);
         esp_wifi_connect();
+#endif
         break;
     default:
         break;

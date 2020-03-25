@@ -63,7 +63,12 @@ extern "C" {
 /*
 	Jace. 200225. Only trigger test.
 */
-#define CTC_TRIGGER_TEST
+#define CTC_TRIGGER_TESTx
+
+/*
+	Jace. 200309. Add Factory reset after 20th reconnect timeout.
+*/
+#define FACTORY_RESET
 
 #ifdef __cplusplus
 }

@@ -89,6 +89,10 @@ int ProcessBinHeader(FILE *binFile);
 int ProcessUserDefinedNameBlock(FILE *binFile);
 int ProcessNextCoeffBlock(FILE *binFile);
 void SpiWriteBlock(uint32_t regAddr, uint8_t *buffer, uint32_t length);
+#if defined(CTC_CS48L32_OKGOOGLE)
+int ProcessSEARCHBlock(FILE *searchFile);
+int ProcessMODELBlock(FILE *modelFile);
+#endif
 #ifdef __cplusplus
 }
 #endif
@@ -837,7 +841,6 @@ int ProcessWMFWFile(const char *filename)
 	}
 	printf("\n----------------------------------------------------------\n\n");
 
-#if 1
 	// Read and process the header.
 	status = ProcessWMFWHeader(wmfwFile);
 	if (WMFW_SUCCESS != status)
@@ -862,7 +865,7 @@ int ProcessWMFWFile(const char *filename)
 	{
 		status = WMFW_SUCCESS;
 	}
-#endif
+
 	return status;
 }
 
@@ -1163,7 +1166,6 @@ int ProcessNextWMFWBlock(FILE *wmfwFile)
 				goto done;
 			}
 
-			//ParseAlgorithmInfoBlock(buffer, blockHeader.dataLength); // Jace_Test
 		}
 		else
 		{
@@ -1193,7 +1195,6 @@ int ProcessNextWMFWBlock(FILE *wmfwFile)
 	// It's a data block for writing to the device.  Allocate a buffer to hold
 	// the data.
 
-    // Jace_Test
     while(blockHeader.dataLength > 4080) // default .max_transfer_sz is (4094) byte. - addr(4) + padding(4) = (4086) and divided registersPerAddress remainder '0'.
     {
         printf("\tblockHeader.dataLength: %d bytes\n", blockHeader.dataLength);
@@ -1729,4 +1730,287 @@ int ProcessNextCoeffBlock(FILE *binFile)
 	return status;
 }
 
+
+#if defined(CTC_CS48L32_OKGOOGLE)
+/*
+*  Function:  ProcessSEARCHFile
+*
+*  @brief  Parses a SEARCH file for loading to the device
+*
+*  This function reads in a SEARCH file, processes it, and sends it block by
+*  block to the device.
+*
+*  @param  filename    File to parse
+*
+*/
+
+int ProcessSEARCHFile(const char *filename)
+{
+	int status = WMFW_SUCCESS;
+
+	printf("\n\n----------------------------------------------------------\n");
+	printf("SEARCH firmware file processing...\n");
+	// Open our SEARCH file
+	FILE *searchFile = fopen(filename, "rb");
+	if (!searchFile)
+	{
+		printf("\tError: Failed to open file.\n");
+		return WMFW_FILE_OPEN_FAILED;
+	}
+	else
+	{
+		printf("\tdetected\n\tProcessing firmware data");
+	}
+	printf("\n----------------------------------------------------------\n");
+
+	// Now process all the blocks in the file.
+	while (WMFW_SUCCESS == status)
+	{
+		status = ProcessSEARCHBlock(searchFile);
+	}
+
+	if (searchFile)
+	{
+		fclose(searchFile);
+		searchFile = NULL;
+	}
+
+	if (WMFW_END_OF_FILE == status)
+	{
+		status = WMFW_SUCCESS;
+	}
+
+	return status;
+}
+
+
+int ProcessSEARCHBlock(FILE *searchFile)
+{
+	WMFW_STATUS		status = WMFW_SUCCESS;
+	unsigned char	*buffer = NULL;
+	unsigned char	buffer_temp[4] = {0, 0, 0, 0};
+	int				i = 0;
+
+	// It's a data block for writing to the device.  Allocate a buffer to hold
+	// the data.
+
+	buffer = (unsigned char *)malloc(4000);
+	if (!buffer)
+	{
+		status = WMFW_OUT_OF_MEMORY;
+        printf("\tError: malloc out of memory\n");
+		goto done;
+	}
+
+	memset(buffer, 0, 4000);
+
+	// Read in our data from the file.
+	while(status == WMFW_SUCCESS)
+	{
+		size_t amountRead = fread(buffer_temp, 1, 3, searchFile);
+		if(amountRead == 3) SwapEndianness(&buffer[(i++ * 4)], (uint8_t*)&buffer_temp, 4);
+
+		if (amountRead < 3)
+		{
+			if (feof(searchFile))
+			{
+				printf("\nEnd of file\n");
+				status = WMFW_END_OF_FILE;
+			}
+			else
+			{
+				printf("\tError: Couldn't read from file\n");
+				status = WMFW_BAD_FILE_FORMAT;
+				goto done;
+			}
+		}
+	}
+
+    {   
+    	// Work out where to write it to.
+    	unsigned int startAddress = 0x284A7C0;
+
+    	printf("\tR%08Xh : 4000 bytes\n\n", startAddress);
+
+    	// And write the data.
+    	SpiWriteBlock(startAddress, buffer, 4000);
+    }
+
+	// fill zero in remaining area
+	memset(buffer, 0, 4000);
+
+    {   
+    	// Work out where to write it to.
+    	unsigned int startAddress = 0x284A7C0 + 4000; // 0x284B760
+
+    	printf("\tR%08Xh : 2144 bytes\n\n", startAddress);
+
+    	// And write the data.
+    	SpiWriteBlock(startAddress, buffer, 2144);
+    }
+
+	// We've finished this block.  Go round for the next one.
+done:
+	if (buffer)
+	{
+		free(buffer);
+		buffer = NULL;
+	}
+	
+	return status;
+}
+
+
+/*
+*  Function:  ProcessMODELFile
+*
+*  @brief  Parses a MODEL file for loading to the device
+*
+*  This function reads in a MODEL file, processes it, and sends it block by
+*  block to the device.
+*
+*  @param  filename    File to parse
+*
+*/
+
+int ProcessMODELFile(const char *filename)
+{
+	int status = WMFW_SUCCESS;
+
+	printf("\n\n----------------------------------------------------------\n");
+	printf("MODEL firmware file processing...\n");
+	// Open our MODEL file
+	FILE *modelFile = fopen(filename, "rb");
+	if (!modelFile)
+	{
+		printf("\tError: Failed to open file.\n");
+		return WMFW_FILE_OPEN_FAILED;
+	}
+	else
+	{
+		printf("\tdetected\n\tProcessing firmware data");
+	}
+	printf("\n----------------------------------------------------------\n");
+
+	// Now process all the blocks in the file.
+	while (WMFW_SUCCESS == status)
+	{
+		status = ProcessMODELBlock(modelFile);
+	}
+
+	if (modelFile)
+	{
+		fclose(modelFile);
+		modelFile = NULL;
+	}
+
+	if (WMFW_END_OF_FILE == status)
+	{
+		status = WMFW_SUCCESS;
+	}
+
+	return status;
+}
+
+
+int ProcessMODELBlock(FILE *modelFile)
+{
+	WMFW_STATUS		status = WMFW_SUCCESS;
+	unsigned char	*buffer = NULL;
+	unsigned char	buffer_temp[4] = {0, 0, 0, 0};
+	unsigned int	modelAreaLength = 360448; // 0x58000
+	unsigned int	startAddress = 0x284BFC0;
+
+	// It's a data block for writing to the device.  Allocate a buffer to hold
+	// the data.
+
+    while(modelAreaLength > 4000)
+    {
+        printf("\tmodelAreaLength: %d bytes\n", modelAreaLength);
+        modelAreaLength -= 4000;
+
+    	buffer = (unsigned char *)malloc(4000);
+    	if (!buffer)
+    	{
+    		status = WMFW_OUT_OF_MEMORY;
+            printf("\tError: malloc out of memory\n");
+    		goto done;
+    	}
+
+		memset(buffer, 0, 4000);
+
+		if(status != WMFW_END_OF_FILE)
+		{
+			for(int i = 0; i < 1000; i++)
+			{
+		    	// Read in our data from the file.
+				size_t amountRead = fread(buffer_temp, 1, 3, modelFile);
+				if(amountRead == 3) SwapEndianness(&buffer[(i * 4)], (uint8_t*)&buffer_temp, 4);
+
+		    	if (amountRead < 3)
+		    	{
+		    		if (feof(modelFile))
+	    			{
+						printf("\t\tEnd of file\n");
+						status = WMFW_END_OF_FILE;
+						break;
+	    			}
+		    		else
+	    			{
+		    			printf("\tError: Couldn't read from file\n");
+			    		status = WMFW_BAD_FILE_FORMAT;
+			    		goto done;
+	    			}
+		    	}
+			}
+		}
+
+        {   
+        	// Work out where to write it to.
+        	printf("\tR%08Xh : 4000 bytes\n", startAddress);
+
+        	// And write the data.
+        	SpiWriteBlock(startAddress, buffer, 4000);
+
+			startAddress += 4000;
+        }
+
+    	if (buffer)
+    	{
+    		free(buffer);
+    		buffer = NULL;
+    	}
+
+    }
+
+	buffer = (unsigned char *)malloc(4000);
+	if (!buffer)
+	{
+		status = WMFW_OUT_OF_MEMORY;
+		printf("\tError: malloc out of memory\n");
+		goto done;
+	}
+
+	// fill zero in remaining area
+	memset(buffer, 0, 4000);
+
+    {   
+    	printf("\tR%08Xh : %d bytes\n\n", startAddress, modelAreaLength);
+
+    	// And write the data.
+    	SpiWriteBlock(startAddress, buffer, modelAreaLength);
+    }
+
+	// We've finished this block.  Go round for the next one.
+done:
+	if (buffer)
+	{
+		free(buffer);
+		buffer = NULL;
+	}
+	
+	return status;
+}
+
+#endif
 ///////////////////////////////// END OF FILE //////////////////////////////////

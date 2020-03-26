@@ -24,6 +24,10 @@
 
 #include "app_defs.h"
 
+#if defined(FACTORY_RESET)
+#include "va_nvs_utils.h"
+#endif
+
 static const char *TAG = "[app_main]";
 
 #if defined(CTC_REV01)
@@ -119,11 +123,17 @@ spi_device_handle_t g_spi = NULL;
 
 static const uint32_t cs48l32_spi_padding = 0x0;
 
-#define CS48L32_REG_TYPE_CONFIG			0
-#define CS48L32_REG_TYPE_DSP_PROGRAM	1
-#define CS48L32_REG_TYPE_DSP_START		2
+#define CS48L32_REG_TYPE_CONFIG				0
+#define CS48L32_REG_TYPE_DSP_PROGRAM		1
+#define CS48L32_REG_TYPE_DSP_START			2
 #if defined(CTC_CS48L32_FLL_ASP1_BCLK)
-#define CS48L32_REG_TYPE_FLL_CHANGE		3
+#define CS48L32_REG_TYPE_FLL_CHANGE			3
+#endif
+#if defined(CTC_CS48L32_OKGOOGLE)
+#define CS48L32_REG_TYPE_OKGOOGLE_CHANGE	4
+#endif
+#if defined(CTC_CS48L32_TUNE_1ST)
+#define CS48L32_REG_TYPE_TUNE_1ST			5
 #endif
 
 #define CS48L32_CONFIG_REG	(146)
@@ -151,8 +161,18 @@ static const uint32_t cs48l32_config[CS48L32_CONFIG_REG][2] =
 	{0x4024,	0x0000},
 	{0x4044,	0x0000},
 	{0x4000,	0x0003},
-	{0x4028,	0x8000A6},
-	{0x4048,	0x8000A6},
+#if defined(CTC_CS48L32_OKGOOGLE)
+	{0x4028,	0x8000BC},	// IN1L_MUTE=0, IN1L_VOL=0dB, IN1L_PGA_VOL=30dB
+	{0x4048,	0x8000BC},	// IN1L_MUTE=0, IN1L_VOL=0dB, IN1L_PGA_VOL=30dB
+#else
+#if defined(CTC_CS48L32_TUNE_1ST)
+	{0x4028,	0x8000B0},	// IN1L_MUTE=0, IN1L_VOL=0dB, IN1L_PGA_VOL=24dB
+	{0x4048,	0x8000B0},	// IN1L_MUTE=0, IN1L_VOL=0dB, IN1L_PGA_VOL=24dB
+#else
+	{0x4028,	0x8000A6},	// IN1L_MUTE=0, IN1L_VOL=0dB, IN1L_PGA_VOL=19dB
+	{0x4048,	0x8000A6},	// IN1L_MUTE=0, IN1L_VOL=0dB, IN1L_PGA_VOL=19dB
+#endif
+#endif
 	{0xC10,		0xE1000000},
 	{0xC14,		0xE1000000},
 	{0xC18,		0xE1000000},
@@ -176,8 +196,13 @@ static const uint32_t cs48l32_config[CS48L32_CONFIG_REG][2] =
 	{0xA404,	0x0C03},
 	{0x8B80,	0x800020},
 	{0x8B84,	0x800021},
+#if defined(CTC_CS48L32_TUNE_1ST)
+	{0x8300,	0x6200B8},
+	{0x8310,	0x6200B8},
+#else
 	{0x8300,	0x6E80B8},
 	{0x8310,	0x6E80B8},
+#endif
 	{0x89C0,	0x00B8},
 	{0x89D0,	0x00B8},
 	{0x9000,	0x80009C},
@@ -593,11 +618,19 @@ static const uint32_t cs48l32_dsp_start[CS48L32_DSP_START_REG][2] =
 	{0x342D4A4,	0x0002},
 	{0x342D758,	0x80000},
 	{0x342D4A0,	0x0011},
-	{0x342D75C,	0x80000},
+#if defined(CTC_CS48L32_TUNE_1ST)
+	{0x342D75C, 0x168C0C},	// AEC - Line Out +9dB
+#else
+	{0x342D75C,	0x80000},	// AEC - Line Out +0dB
+#endif
 	{0x342D4A0,	0x0011},
 	{0x342D758,	0x80000},
 	{0x342D4A0,	0x0011},
-	{0x342D75C,	0x80000},
+#if defined(CTC_CS48L32_TUNE_1ST)
+	{0x342D75C, 0x168C0C},	// AEC - Line Out +9dB
+#else
+	{0x342D75C,	0x80000},	// AEC - Line Out +0dB
+#endif
 	{0x342D4A0,	0x0011},
 	{0x342D760,	0x0001},
 	{0x342D4A0,	0x0012},
@@ -605,9 +638,17 @@ static const uint32_t cs48l32_dsp_start[CS48L32_DSP_START_REG][2] =
 	{0x342D4A0,	0x0012},
 	{0x342D768,	0x0040},
 	{0x342D4A0,	0x0013},
+#if defined(CTC_CS48L32_TUNE_1ST)
+	{0x342D76C, 0x4000},
+#else
 	{0x342D76C,	0x8000},
+#endif
 	{0x342D4A0,	0x0013},
+#if defined(CTC_CS48L32_TUNE_1ST)
+	{0x342D770, 0x4000},
+#else
 	{0x342D770,	0x0000},
+#endif
 	{0x342D4A0,	0x0013},
 	{0x342D774,	0x666666},
 	{0x342D4A0,	0x0013},
@@ -617,9 +658,17 @@ static const uint32_t cs48l32_dsp_start[CS48L32_DSP_START_REG][2] =
 	{0x342D4A0,	0x0012},
 	{0x342D768,	0x0040},
 	{0x342D4A0,	0x0013},
+#if defined(CTC_CS48L32_TUNE_1ST)
+	{0x342D76C, 0x4000},
+#else
 	{0x342D76C,	0x8000},
+#endif
 	{0x342D4A0,	0x0013},
+#if defined(CTC_CS48L32_TUNE_1ST)
+	{0x342D770, 0x4000},
+#else
 	{0x342D770,	0x0000},
+#endif
 	{0x342D4A0,	0x0013},
 	{0x342D774,	0x666666},
 	{0x342D4A0,	0x0013},
@@ -768,8 +817,18 @@ static const uint32_t cs48l32_fll_change[CS48L32_FLL_CHANGE_REG][2] =
 	{0x4024,	0x0000},
 	{0x4044,	0x0000},
 	{0x4000,	0x0003},
-	{0x4028,	0x8000A6},
-	{0x4048,	0x8000A6},
+#if defined(CTC_CS48L32_OKGOOGLE)
+	{0x4028,	0x8000BC},	// IN1L_MUTE=0, IN1L_VOL=0dB, IN1L_PGA_VOL=30dB
+	{0x4048,	0x8000BC},	// IN1L_MUTE=0, IN1L_VOL=0dB, IN1L_PGA_VOL=30dB
+#else
+#if defined(CTC_CS48L32_TUNE_1ST)
+	{0x4028,	0x8000B0},	// IN1L_MUTE=0, IN1L_VOL=0dB, IN1L_PGA_VOL=24dB
+	{0x4048,	0x8000B0},	// IN1L_MUTE=0, IN1L_VOL=0dB, IN1L_PGA_VOL=24dB
+#else
+	{0x4028,	0x8000A6},	// IN1L_MUTE=0, IN1L_VOL=0dB, IN1L_PGA_VOL=19dB
+	{0x4048,	0x8000A6},	// IN1L_MUTE=0, IN1L_VOL=0dB, IN1L_PGA_VOL=19dB
+#endif
+#endif
 	{0xC10,		0xE1000000},
 	{0xC14,		0xE1000000},
 	{0xC18,		0xE1000000},
@@ -793,8 +852,13 @@ static const uint32_t cs48l32_fll_change[CS48L32_FLL_CHANGE_REG][2] =
 	{0xA404,	0x0C03},
 	{0x8B80,	0x800020},
 	{0x8B84,	0x800021},
+#if defined(CTC_CS48L32_TUNE_1ST)
+	{0x8300,	0x6200B8},
+	{0x8310,	0x6200B8},
+#else
 	{0x8300,	0x6E80B8},
 	{0x8310,	0x6E80B8},
+#endif
 	{0x89C0,	0x00B8},
 	{0x89D0,	0x00B8},
 	{0x9000,	0x80009C},
@@ -807,6 +871,233 @@ static const uint32_t cs48l32_fll_change[CS48L32_FLL_CHANGE_REG][2] =
 	{0x8210,	0x80009A},	// Jace. 200110. Cirrus's DSP output pin 4 have delay result.
 	{0xA808,	0x0001},
 	{0x4014,	0x20000000}
+};
+#endif
+
+#if defined(CTC_CS48L32_OKGOOGLE)
+#define CS48L32_OKGOOGLE_CHANGE_REG	(2)
+static const uint32_t cs48l32_okgoogle_change[CS48L32_OKGOOGLE_CHANGE_REG][2] =
+{
+	{0x2800448,	0x0002},
+	{0x2800448,	0x0001}
+};
+#endif
+
+#if defined(CTC_CS48L32_TUNE_1ST)
+#define CS48L32_TUNE_1ST_REG	(211)
+static const uint32_t cs48l32_tune_1st[CS48L32_TUNE_1ST_REG][2] =
+{
+	{0x2800424,	0x0001},
+	{0x2800428,	0x0000},
+	{0x342D4A8,	0x0001},
+	{0x342D4AC,	0x80000},
+	{0x342D5AC,	0x80000},
+	{0x342D5B0,	0x168C0C},	// AEC - Line Out +9dB
+	{0x342D5B4,	0x0001},
+	{0x342D5B8,	0x0001},
+	{0x342D5BC,	0x0040},
+	{0x342D5C0,	0x4000},
+	{0x342D5C4,	0x4000},
+	{0x342D5C8,	0x666666},
+	{0x342D5CC,	0x0001},
+	{0x342D5D0,	0x333333},
+	{0x342D5D4,	0x0001},
+	{0x342D5D8,	0x0001},
+	{0x342D5DC,	0x0000},
+	{0x342D5E4,	0x1030E},
+	{0x342D5E8,	0x1062},
+	{0x342D5EC,	0x1388},
+	{0x342D5F0,	0x0000},
+	{0x342D5F4,	0x2D6A16},
+	{0x342D5F8,	0x2D6A16},
+	{0x342D5FC,	0x404EA},
+	{0x342D600,	0x2D17C2},
+	{0x342D604,	0x0001},
+	{0x342D608,	0x0000},
+	{0x342D60C,	0x0000},
+	{0x342D610,	0x0000},
+	{0x342D614,	0x0000},
+	{0x342D618,	0x0000},
+	{0x342D61C,	0x0000},
+	{0x342D620,	0x10000},
+	{0x342D624,	0x10000},
+	{0x342D628,	0x10000},
+	{0x342D62C,	0x10000},
+	{0x342D630,	0x400000},
+	{0x342D634,	0x0000},
+	{0x342D638,	0x0000},
+	{0x342D63C,	0x0000},
+	{0x342D640,	0x0000},
+	{0x342D644,	0x400000},
+	{0x342D648,	0x0000},
+	{0x342D64C,	0x0000},
+	{0x342D650,	0x0000},
+	{0x342D654,	0x0000},
+	{0x342D658,	0x400000},
+	{0x342D65C,	0x0000},
+	{0x342D660,	0x0000},
+	{0x342D664,	0x0000},
+	{0x342D668,	0x0000},
+	{0x342D66C,	0x400000},
+	{0x342D670,	0x0000},
+	{0x342D674,	0x0000},
+	{0x342D678,	0x0000},
+	{0x342D67C,	0x0000},
+	{0x342D6A0,	0x0000},
+	{0x342D6A4,	0x76147B},
+	{0x342D6A8,	0x500000},
+	{0x342D6AC,	0x3E51EC},
+	{0x342D6B0,	0x147AE1},
+	{0x342D758,	0x80000},
+	{0x342D75C,	0x168C0C},	// AEC - Line Out +9dB
+	{0x342D760,	0x0001},
+	{0x342D764,	0x0001},
+	{0x342D768,	0x0040},
+	{0x342D76C,	0x4000},
+	{0x342D770,	0x4000},
+	{0x342D774,	0x666666},
+	{0x342D778,	0x0001},
+	{0x342D77C,	0x333333},
+	{0x342D780,	0x0001},
+	{0x342D784,	0x0001},
+	{0x342D788,	0x0000},
+	{0x342D790,	0x1030E},
+	{0x342D794,	0x1062},
+	{0x342D798,	0x1388},
+	{0x342D79C,	0x0000},
+	{0x342D7A0,	0x2D6A16},
+	{0x342D7A4,	0x2D6A16},
+	{0x342D7A8,	0x404EA},
+	{0x342D7AC,	0x2D17C2},
+	{0x342D7B0,	0x0001},
+	{0x342D7B4,	0x0000},
+	{0x342D7B8,	0x0000},
+	{0x342D7BC,	0x0000},
+	{0x342D7C0,	0x0000},
+	{0x342D7C4,	0x0000},
+	{0x342D7C8,	0x0000},
+	{0x342D7CC,	0x10000},
+	{0x342D7D0,	0x10000},
+	{0x342D7D4,	0x10000},
+	{0x342D7D8,	0x10000},
+	{0x342D7DC,	0x400000},
+	{0x342D7E0,	0x0000},
+	{0x342D7E4,	0x0000},
+	{0x342D7E8,	0x0000},
+	{0x342D7EC,	0x0000},
+	{0x342D7F0,	0x400000},
+	{0x342D7F4,	0x0000},
+	{0x342D7F8,	0x0000},
+	{0x342D7FC,	0x0000},
+	{0x342D800,	0x0000},
+	{0x342D804,	0x400000},
+	{0x342D808,	0x0000},
+	{0x342D80C,	0x0000},
+	{0x342D810,	0x0000},
+	{0x342D814,	0x0000},
+	{0x342D818,	0x400000},
+	{0x342D81C,	0x0000},
+	{0x342D820,	0x0000},
+	{0x342D824,	0x0000},
+	{0x342D828,	0x0000},
+	{0x342D84C,	0x0000},
+	{0x342D850,	0x76147B},
+	{0x342D854,	0x500000},
+	{0x342D858,	0x3E51EC},
+	{0x342D85C,	0x147AE1},
+	{0x342F008,	0x80000},
+	{0x342F00C,	0xFF64C},	// Duet - Line Out +6dB
+	{0x342F010,	0x80000},
+	{0x342F014,	0x80000},
+	{0x342F018,	0x0000},
+	{0x342F01C,	0x0001},
+	{0x342F024,	0x0000},
+	{0x342F028,	0x0001},
+	{0x342F030,	0x0020},
+	{0x342F034,	0x012C},
+	{0x342F038,	0x8000},
+	{0x342F03C,	0x0009},
+	{0x342F040,	0x0000},
+	{0x342F044,	0x0020},
+	{0x342F048,	0x012C},
+	{0x342F050,	0x0009},
+	{0x342F05C,	0x66666},
+	{0x342F060,	0x0001},
+	{0x342F074,	0x16D5D},
+	{0x342F078,	0x4189},
+	{0x342F080,	0x2DC5D},
+	{0x342F084,	0x0001},
+	{0x342F088,	0x2C1C2C},
+	{0x342F08C,	0x0001},
+	{0x342F090,	0x0001},
+	{0x342F094,	0xFFFFEC},
+	{0x342F098,	0x001E},
+	{0x342F09C,	0xA0000},
+	{0x342F0A0,	0x0001},
+	{0x342F0A4,	0x200000},
+	{0x342F0A8,	0x200000},
+	{0x342F0AC,	0x0000},
+	{0x342F0B0,	0x0001},
+	{0x342F0B4,	0x0001},
+	{0x342F0B8,	0x0000},
+	{0x342F0BC,	0x0000},
+	{0x342F0C0,	0x0000},
+	{0x342F0C4,	0x0001},
+	{0x342F0C8,	0x0037},
+	{0x342F0CC,	0x154D},
+	{0x342F0D0,	0x0001},
+	{0x342F0D4,	0x0000},
+	{0x342F0D8,	0x287A27},
+	{0x342F0DC,	0x5A7EFA},
+	{0x342F0E0,	0x404DE},
+	{0x342F0E4,	0x3298B0},
+	{0x342F0E8,	0x0001},
+	{0x342F0EC,	0x0000},
+	{0x342F0F0,	0x0000},
+	{0x342F0F4,	0x0000},
+	{0x342F0F8,	0x0000},
+	{0x342F0FC,	0x0000},
+	{0x342F100,	0x0000},
+	{0x342F104,	0x10000},
+	{0x342F108,	0x10000},
+	{0x342F10C,	0x10000},
+	{0x342F110,	0x10000},
+	{0x342F114,	0x400000},
+	{0x342F118,	0x0000},
+	{0x342F11C,	0x0000},
+	{0x342F120,	0x0000},
+	{0x342F124,	0x0000},
+	{0x342F128,	0x400000},
+	{0x342F12C,	0x0000},
+	{0x342F130,	0x0000},
+	{0x342F134,	0x0000},
+	{0x342F138,	0x0000},
+	{0x342F13C,	0x400000},
+	{0x342F140,	0x0000},
+	{0x342F144,	0x0000},
+	{0x342F148,	0x0000},
+	{0x342F14C,	0x0000},
+	{0x342F150,	0x400000},
+	{0x342F154,	0x0000},
+	{0x342F158,	0x0000},
+	{0x342F15C,	0x0000},
+	{0x342F160,	0x0000},
+	{0x342F164,	0x0000},
+	{0x342F1FC,	0x0001},
+	{0x342F200,	0x80000},
+	{0x342F204,	0x80000},
+	{0x342F23C,	0x0000},
+	{0x342F240,	0x0000},
+	{0x342F244,	0x0000},
+	{0x342F248,	0x0000},
+	{0x342F24C,	0x0000},
+	{0x342F250,	0x0000},
+	{0x342F254,	0x0000},
+	{0x342F258,	0x0000},
+	{0x342F25C,	0x0000},
+	{0x342F260,	0x0000},
+	{0x342F264,	0x0000},
+	{0x342F268,	0x0000}
 };
 #endif
 
@@ -1093,6 +1384,42 @@ static esp_err_t cs_spi_firmware_write(void)
 	return ret;
 }
 
+#if defined(CTC_CS48L32_OKGOOGLE)
+static esp_err_t cs_spi_okgoogle_write(void)
+{
+	esp_err_t ret = ESP_OK;
+
+	const char *searchfilename = "/spiffs/okgoogle-op13-search.bin";
+	const char *modelfilename = "/spiffs/okgoogle-op13-net.bin";
+
+	// Use settings defined above to initialize and mount SPIFFS filesystem.
+	ctc_spiffs_init();
+
+	// SEARCH file
+	ret = (esp_err_t)ProcessSEARCHFile(searchfilename);
+	if (ret != ESP_OK) {
+		ESP_LOGE(TAG, "[ 0 ] process %s search file error : %d", searchfilename, ret);
+	}
+	else {
+		ESP_LOGE(TAG, "[ 0 ] process %s search file success", searchfilename);
+	}
+
+	// MODEL file
+	ret = (esp_err_t)ProcessMODELFile(modelfilename);
+	if (ret != ESP_OK) {
+		ESP_LOGE(TAG, "[ 0 ] process %s model file error : %d", modelfilename, ret);
+	}
+	else {
+		ESP_LOGE(TAG, "[ 0 ] process %s model file success", modelfilename);
+	}
+
+    // All done, unmount partition and disable SPIFFS
+    ret = esp_vfs_spiffs_unregister(NULL);
+
+	return ret;
+}
+#endif
+
 static esp_err_t cs_spi_register_block_write(uint8_t reg_block)
 {
 	esp_err_t ret = ESP_OK;
@@ -1182,6 +1509,22 @@ static esp_err_t cs_spi_register_write(uint8_t reg_start, uint8_t reg_end, uint8
 					break;
 #endif
 
+#if defined(CTC_CS48L32_OKGOOGLE)
+				case CS48L32_REG_TYPE_OKGOOGLE_CHANGE:
+					swap_endianness(&dataOut[0], (uint8_t*)&cs48l32_okgoogle_change[i][0], 4);
+					swap_endianness(&dataOut[4], (uint8_t*)&cs48l32_spi_padding, 4);
+					swap_endianness(&dataOut[8], (uint8_t*)&cs48l32_okgoogle_change[i][1], 4);
+					break;
+#endif
+
+#if defined(CTC_CS48L32_TUNE_1ST)
+				case CS48L32_REG_TYPE_TUNE_1ST:
+					swap_endianness(&dataOut[0], (uint8_t*)&cs48l32_tune_1st[i][0], 4);
+					swap_endianness(&dataOut[4], (uint8_t*)&cs48l32_spi_padding, 4);
+					swap_endianness(&dataOut[8], (uint8_t*)&cs48l32_tune_1st[i][1], 4);
+					break;
+#endif
+
 				default:
 					ret = ESP_FAIL;
 					break;
@@ -1213,6 +1556,9 @@ bool provisioning_state = false;
 
 static EventGroupHandle_t cm_event_group;
 const int CONNECTED_BIT = BIT0;
+#if defined(FACTORY_RESET)
+uint8_t reset_counter = 0;
+#endif
 
 static esp_err_t event_handler(void *ctx, system_event_t *event)
 {
@@ -1223,10 +1569,28 @@ static esp_err_t event_handler(void *ctx, system_event_t *event)
     case SYSTEM_EVENT_STA_GOT_IP:
         ESP_LOGI(TAG, "Connected with IP Address:%s", ip4addr_ntoa(&event->event_info.got_ip.ip_info.ip));
         xEventGroupSetBits(cm_event_group, CONNECTED_BIT);
+#if defined(FACTORY_RESET)
+		reset_counter = 0;
+#endif
         break;
     case SYSTEM_EVENT_STA_DISCONNECTED:
+#if defined(FACTORY_RESET)
+		printf("%s: Disconnected. Event: %d. Connecting to the AP again Try %d\n", TAG, event->event_id, reset_counter++);
+		if(reset_counter < 20)
+			esp_wifi_connect();
+		else
+		{
+			reset_counter = 0;
+
+			va_led_set(LED_OFF);
+			va_nvs_flash_erase();
+			va_reset();
+			esp_restart();
+		}
+#else
         ESP_LOGI(TAG, "Disconnected, connecting to the AP again...\n");
         esp_wifi_connect();
+#endif
         break;
     default:
         break;
@@ -1324,8 +1688,24 @@ void app_main()
 	cs_spi_register_write((CS48L32_DSP_PROGRAM_REG - 2), CS48L32_DSP_PROGRAM_REG, CS48L32_REG_TYPE_DSP_PROGRAM);
 	vTaskDelay(100 / portTICK_PERIOD_MS);
 
+#if defined(CTC_CS48L32_OKGOOGLE)
+	//cs_spi_register_write(0, (CS48L32_OKGOOGLE_CHANGE_REG - 1), CS48L32_REG_TYPE_OKGOOGLE_CHANGE);
+	//vTaskDelay(100 / portTICK_PERIOD_MS);
+
+	cs_spi_okgoogle_write();
+	vTaskDelay(500 / portTICK_PERIOD_MS);
+
+	//cs_spi_register_write((CS48L32_OKGOOGLE_CHANGE_REG - 1), CS48L32_OKGOOGLE_CHANGE_REG, CS48L32_REG_TYPE_OKGOOGLE_CHANGE);
+	//vTaskDelay(1000 / portTICK_PERIOD_MS);
+#endif
+
+#if defined(CTC_CS48L32_TUNE_1ST)
+	cs_spi_register_write(0, CS48L32_TUNE_1ST_REG, CS48L32_REG_TYPE_TUNE_1ST);
+	vTaskDelay(500 / portTICK_PERIOD_MS);
+#endif
+
 	cs_spi_register_write(0, CS48L32_DSP_START_REG, CS48L32_REG_TYPE_DSP_START);
-	vTaskDelay(1000 / portTICK_PERIOD_MS);
+	vTaskDelay(100 / portTICK_PERIOD_MS);
 
 #if defined(CTC_CS48L32_SENSORY)
 	esp_cs_irq_intr_init();
@@ -1388,8 +1768,7 @@ void app_main()
 #if defined(CTC_CS48L32_FLL_ASP1_BCLK)
 	ESP_LOGE(TAG, "BCLK changed.");
 	cs_spi_register_write(0, CS48L32_FLL_CHANGE_REG, CS48L32_REG_TYPE_FLL_CHANGE);
-	vTaskDelay(100 / portTICK_PERIOD_MS);
+	vTaskDelay(1000 / portTICK_PERIOD_MS);
 #endif
-
     return;
 }

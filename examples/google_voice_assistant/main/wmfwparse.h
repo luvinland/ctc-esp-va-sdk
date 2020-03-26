@@ -15,6 +15,8 @@
 */
 #include "reg_defs.h"
 
+#include "app_defs.h"
+
 #pragma once
 
 /*
@@ -178,6 +180,10 @@ extern "C" {
 #endif
 int ProcessBinFile(const char *filename);
 int ProcessWMFWFile(const char *filename);
+#if defined(CTC_CS48L32_OKGOOGLE)
+int ProcessSEARCHFile(const char *filename);
+int ProcessMODELFile(const char *filename);
+#endif
 #ifdef __cplusplus
 }
 #endif

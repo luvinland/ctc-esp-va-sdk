@@ -40,6 +40,21 @@ extern "C" {
 */
 #define CTC_GVA_CS48L32
 
+/*
+	Jace. 200225. Apply 1st tunning data for CS48L32.
+*/
+#define CTC_CS48L32_TUNE_1ST
+
+/*
+	Jace. 200316. Replace sensory trigger "Alexa" with "Ok google".
+*/
+#define CTC_CS48L32_OKGOOGLE
+
+/*
+	Jace. 200309. Add Factory reset after 20th reconnect timeout.
+*/
+#define FACTORY_RESET
+
 #ifdef __cplusplus
 }
 #endif

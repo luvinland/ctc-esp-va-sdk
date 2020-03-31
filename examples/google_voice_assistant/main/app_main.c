@@ -1389,8 +1389,8 @@ static esp_err_t cs_spi_okgoogle_write(void)
 {
 	esp_err_t ret = ESP_OK;
 
-	const char *searchfilename = "/spiffs/okgoogle-op13-search.bin";
-	const char *modelfilename = "/spiffs/okgoogle-op13-net.bin";
+	const char *searchfilename = "/spiffs/okgoogle-op07-search.bin";
+	const char *modelfilename = "/spiffs/okgoogle-op07-net.bin";
 
 	// Use settings defined above to initialize and mount SPIFFS filesystem.
 	ctc_spiffs_init();

@@ -65,11 +65,13 @@ static void ww_detection_task(void *arg)
             int r = esp_wwe_detect(buffer);
             if (r && dd.detect_wakeword) {
                 int new_ms = (chunks*audio_chunksize*1000)/frequency;
+#if !defined (CTC_CS48L32_SENSORY_TRIGGER)
 #if defined(CTC_TRIGGER_TEST)
 				trigger_count++;
                 ESP_LOGE(TAG, "[ESP32] triggered. Count[%d]", trigger_count);
 #else
                 ESP_LOGE(TAG, "%.2f: Neural network detection triggered output %d.", (float)new_ms/1000.0, r);
+#endif
 #endif
                 int x = (new_ms - priv_ms);
                 priv_ms = new_ms;

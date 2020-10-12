@@ -16,7 +16,7 @@ extern "C" {
 #define CTC_CS48L32
 
 /*
-	Jace. 200109. Ready or Disable Sensory's trigger function with CS48L32.
+	Jace. 200109. Ready or Disable Sensory's trigger function with CS48L32. Undefine during tune from agency.
 */
 #define CTC_CS48L32_SENSORY
 
@@ -69,6 +69,21 @@ extern "C" {
 	Jace. 200309. Add Factory reset after 20th reconnect timeout.
 */
 #define FACTORY_RESET
+
+/*
+	Jace. 200622. Control mute/unmute function using CS48L32 register
+*/
+#define CTC_CS48L32_MUTE_CONTROL
+
+/*
+	Jace. 200622. Using switch type instead of tact type.
+*/
+#define CTC_CS48L32_SWITCH_TYPEx
+
+/*
+	Jace. 200709. Apply 2nd tunning data for COWAY.
+*/
+#define CTC_CS48L32_TUNE_2ND_COWAY
 
 #ifdef __cplusplus
 }

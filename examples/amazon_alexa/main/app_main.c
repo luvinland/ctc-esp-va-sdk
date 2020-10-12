@@ -158,6 +158,9 @@ static const uint32_t cs48l32_spi_padding = 0x0;
 #if defined(CTC_CS48L32_CHECK_REG)
 #define CS48L32_REG_TYPE_CHECK_REG		5
 #endif
+#if defined(CTC_CS48L32_MUTE_CONTROL)
+#define CS48L32_REG_TYPE_MUTE_CONTROL	6
+#endif
 #else
 #define CS48L32_REG_TYPE_CONFIG			0
 #define CS48L32_REG_TYPE_DSP_PROGRAM	1
@@ -192,12 +195,17 @@ static const uint32_t cs48l32_config[CS48L32_CONFIG_REG][2] =
 	{0x4024,	0x0000},
 	{0x4044,	0x0000},
 	{0x4000,	0x0003},
+#if defined(CTC_CS48L32_TUNE_2ND_COWAY)
+	{0x4028,	0x8000BC},	// IN1L_MUTE=0, IN1L_VOL=0dB, IN1L_PGA_VOL=30dB
+	{0x4048,	0x8000BC},	// IN1L_MUTE=0, IN1L_VOL=0dB, IN1L_PGA_VOL=30dB
+#else
 #if defined(CTC_CS48L32_TUNE_1ST)
 	{0x4028,	0x8000BC},	// IN1L_MUTE=0, IN1L_VOL=0dB, IN1L_PGA_VOL=30dB
 	{0x4048,	0x8000BC},	// IN1L_MUTE=0, IN1L_VOL=0dB, IN1L_PGA_VOL=30dB
 #else
 	{0x4028,	0x8000A6},
 	{0x4048,	0x8000A6},
+#endif
 #endif
 	{0xC10,		0xE1000000},
 	{0xC14,		0xE1000000},
@@ -426,7 +434,11 @@ static const uint32_t cs48l32_tune_1st[CS48L32_TUNE_1ST_REG][2] =
 	{0x342D4A8,	0x0001},
 	{0x342D4AC,	0x80000},
 	{0x342D5AC,	0x80000},
+#if defined(CTC_CS48L32_TUNE_2ND_COWAY)
+	{0x342D5B0,	0x2CFCC0},
+#else
 	{0x342D5B0,	0x168C0C},
+#endif
 	{0x342D5B4,	0x0001},
 	{0x342D5B8,	0x0001},
 	{0x342D5BC,	0x0040},
@@ -483,7 +495,11 @@ static const uint32_t cs48l32_tune_1st[CS48L32_TUNE_1ST_REG][2] =
 	{0x342D6AC,	0x3E51EC},
 	{0x342D6B0,	0x147AE1},
 	{0x342D758,	0x80000},
+#if defined(CTC_CS48L32_TUNE_2ND_COWAY)
+	{0x342D75C,	0x2CFCC0},
+#else
 	{0x342D75C,	0x168C0C},
+#endif
 	{0x342D760,	0x0001},
 	{0x342D764,	0x0001},
 	{0x342D768,	0x0040},
@@ -540,7 +556,11 @@ static const uint32_t cs48l32_tune_1st[CS48L32_TUNE_1ST_REG][2] =
 	{0x342D858,	0x3E51EC},
 	{0x342D85C,	0x147AE1},
 	{0x342F008,	0x80000},
+#if defined(CTC_CS48L32_TUNE_2ND_COWAY)
+	{0x342F00C,	0xB4CE0},
+#else
 	{0x342F00C,	0xFF64C},
+#endif
 	{0x342F010,	0x80000},
 	{0x342F014,	0x80000},
 	{0x342F018,	0x0000},
@@ -862,18 +882,26 @@ static const uint32_t cs48l32_dsp_start[CS48L32_DSP_START_REG][2] =
 	{0x342D4A4,	0x0002},
 	{0x342D758,	0x80000},
 	{0x342D4A0,	0x0011},
+#if defined(CTC_CS48L32_TUNE_2ND_COWAY)
+	{0x342D75C, 0x2CFCC0},
+#else
 #if defined(CTC_CS48L32_TUNE_1ST)
 	{0x342D75C,	0x168C0C},
 #else
 	{0x342D75C,	0x80000},
 #endif
+#endif
 	{0x342D4A0,	0x0011},
 	{0x342D758,	0x80000},
 	{0x342D4A0,	0x0011},
+#if defined(CTC_CS48L32_TUNE_2ND_COWAY)
+	{0x342D75C, 0x2CFCC0},
+#else
 #if defined(CTC_CS48L32_TUNE_1ST)
 	{0x342D75C,	0x168C0C},
 #else
 	{0x342D75C,	0x80000},
+#endif
 #endif
 	{0x342D4A0,	0x0011},
 	{0x342D760,	0x0001},
@@ -1061,12 +1089,17 @@ static const uint32_t cs48l32_fll_change[CS48L32_FLL_CHANGE_REG][2] =
 	{0x4024,	0x0000},
 	{0x4044,	0x0000},
 	{0x4000,	0x0003},
+#if defined(CTC_CS48L32_TUNE_2ND_COWAY)
+	{0x4028,	0x8000BC},	// IN1L_MUTE=0, IN1L_VOL=0dB, IN1L_PGA_VOL=30dB
+	{0x4048,	0x8000BC},	// IN1L_MUTE=0, IN1L_VOL=0dB, IN1L_PGA_VOL=30dB
+#else
 #if defined(CTC_CS48L32_TUNE_1ST)
 	{0x4028,	0x8000BC},	// IN1L_MUTE=0, IN1L_VOL=0dB, IN1L_PGA_VOL=30dB
 	{0x4048,	0x8000BC},	// IN1L_MUTE=0, IN1L_VOL=0dB, IN1L_PGA_VOL=30dB
 #else
 	{0x4028,	0x8000A6},
 	{0x4048,	0x8000A6},
+#endif
 #endif
 	{0xC10,		0xE1000000},
 	{0xC14,		0xE1000000},
@@ -1122,6 +1155,21 @@ static const uint32_t cs48l32_check_reg[CS48L32_CHECK_REG][2] =
 	{0x8342D76C,	0x0},
 	{0x8342D770,	0x0},
 	{0x8342F09C,	0x0},
+};
+#endif
+
+#if defined(CTC_CS48L32_MUTE_CONTROL)
+#define CS48L32_MUTE_CONTROL	(8)
+static const uint32_t cs48l32_mute_control[CS48L32_MUTE_CONTROL][2] =
+{
+	{0x8300,	0x6200B8}, // Unmute
+	{0x8310,	0x6200B8},
+	{0x9000,	0x80009C},
+	{0x9020,	0x80009D},
+	{0x8300,	0x620000}, // Mute
+	{0x8310,	0x620000},
+	{0x9000,	0x800000},
+	{0x9020,	0x800000}
 };
 #endif
 
@@ -1238,81 +1286,6 @@ static esp_err_t cs_spi_sensory_disable(void)
 	return ret;
 }
 #endif
-
-#define GPIO_ESP_SW3		0
-#define GPIO_ESP_CS_IRQ		21
-#define GPIO_IRQ_PIN_SEL	((1ULL<<GPIO_ESP_SW3) | (1ULL<<GPIO_ESP_CS_IRQ))
-
-#define ESP_INTR_FLAG_DEFAULT 0
-
-static xQueueHandle gpio_evt_queue = NULL;
-
-static void IRAM_ATTR gpio_isr_handler(void* arg)
-{
-	uint32_t gpio_num = (uint32_t) arg;
-	xQueueSendFromISR(gpio_evt_queue, &gpio_num, NULL);
-}
-
-static void gpio_task_example(void* arg)
-{
-	uint32_t io_num;
-	uint8_t toggle = 1;
-#if defined(CTC_TRIGGER_TEST)
-	uint32_t trigger_count = 0;
-#endif
-
-	for(;;) {
-		if(xQueueReceive(gpio_evt_queue, &io_num, portMAX_DELAY)) {
-			if((io_num == 0) && (gpio_get_level(io_num) == 0))
-			{
-				ESP_LOGE(TAG, "[AK4384VT] AMP PDN toggle.");
-				toggle ^= (1 << 0);
-				gpio_set_level(GPIO_AK_PDN, toggle);
-				vTaskDelay(100 / portTICK_PERIOD_MS);
-			}
-			else if((io_num == 21) && (gpio_get_level(io_num) == 0))
-			{
-#if defined(CTC_CS48L32_SENSORY_TRIGGER)
-#if defined(CTC_TRIGGER_TEST)
-				trigger_count++;
-				ESP_LOGE(TAG, "[CS48L32] Sensory detection triggered. Count[%d]", trigger_count);
-				vTaskDelay(100 / portTICK_PERIOD_MS);
-				cs_spi_sensory_ready();
-#else
-				ESP_LOGE(TAG, "[CS48L32] Sensory detection triggered.");
-				va_dsp_tap_to_talk_start();
-#endif
-#endif
-			}
-		}
-	}
-}
-
-static void esp_cs_irq_intr_init(void)
-{
-	gpio_config_t io_conf;
-	//interrupt of rising edge
-	io_conf.intr_type = GPIO_PIN_INTR_NEGEDGE;
-	//bit mask of the pins, use GPIO4/5 here
-	io_conf.pin_bit_mask = GPIO_IRQ_PIN_SEL;
-	//set as input mode    
-	io_conf.mode = GPIO_MODE_INPUT;
-	//enable pull-up mode
-	io_conf.pull_up_en = 1;
-	gpio_config(&io_conf);
-
-	//create a queue to handle gpio event from isr
-	gpio_evt_queue = xQueueCreate(10, sizeof(uint32_t));
-	//start gpio task
-	xTaskCreate(gpio_task_example, "gpio_task_example", 2048, NULL, (CONFIG_ESP32_PTHREAD_TASK_PRIO_DEFAULT - 1), NULL);
-
-	//install gpio isr service
-	gpio_install_isr_service(ESP_INTR_FLAG_DEFAULT);
-	//hook isr handler for specific gpio pin
-	gpio_isr_handler_add(GPIO_ESP_SW3, gpio_isr_handler, (void*) GPIO_ESP_SW3);
-	//hook isr handler for specific gpio pin
-	gpio_isr_handler_add(GPIO_ESP_CS_IRQ, gpio_isr_handler, (void*) GPIO_ESP_CS_IRQ);
-}
 
 static void ak_reset(void)
 {
@@ -1522,6 +1495,15 @@ static esp_err_t cs_spi_register_write(uint8_t reg_start, uint8_t reg_end, uint8
 					swap_endianness(&dataOut[8], (uint8_t*)&cs48l32_check_reg[i][1], 4);
 					break;
 #endif
+
+#if defined(CTC_CS48L32_MUTE_CONTROL)
+				case CS48L32_REG_TYPE_MUTE_CONTROL:
+					swap_endianness(&dataOut[0], (uint8_t*)&cs48l32_mute_control[i][0], 4);
+					swap_endianness(&dataOut[4], (uint8_t*)&cs48l32_spi_padding, 4);
+					swap_endianness(&dataOut[8], (uint8_t*)&cs48l32_mute_control[i][1], 4);
+					break;
+#endif
+
 				default:
 					ret = ESP_FAIL;
 					break;
@@ -1548,6 +1530,112 @@ static esp_err_t cs_spi_register_write(uint8_t reg_start, uint8_t reg_end, uint8
 	return ret;
 }
 #endif
+
+#define GPIO_ESP_SW3		0
+#define GPIO_ESP_CS_IRQ		21
+#define GPIO_IRQ_PIN_SEL	((1ULL<<GPIO_ESP_SW3) | (1ULL<<GPIO_ESP_CS_IRQ))
+
+#define ESP_INTR_FLAG_DEFAULT 0
+
+static xQueueHandle gpio_evt_queue = NULL;
+
+static void IRAM_ATTR gpio_isr_handler(void* arg)
+{
+	uint32_t gpio_num = (uint32_t) arg;
+	xQueueSendFromISR(gpio_evt_queue, &gpio_num, NULL);
+}
+
+static void gpio_task_example(void* arg)
+{
+	uint32_t io_num;
+	uint8_t toggle = 1;
+#if defined(CTC_TRIGGER_TEST)
+	uint32_t trigger_count = 0;
+#endif
+
+	for(;;) {
+		if(xQueueReceive(gpio_evt_queue, &io_num, portMAX_DELAY)) {
+#if defined(CTC_CS48L32_SWITCH_TYPE)
+			if((io_num == 0) && (gpio_get_level(io_num) == 0))
+			{
+				ESP_LOGE(TAG, "[AK4384VT] AMP mute.");
+				gpio_set_level(GPIO_AK_PDN, 0);
+#if defined(CTC_CS48L32_SENSORY)
+				cs_spi_register_write((CS48L32_MUTE_CONTROL - 4), CS48L32_MUTE_CONTROL, CS48L32_REG_TYPE_MUTE_CONTROL);
+#endif
+				vTaskDelay(100 / portTICK_PERIOD_MS);
+			}
+			else if((io_num == 0) && (gpio_get_level(io_num) == 1))
+			{
+				ESP_LOGE(TAG, "[AK4384VT] AMP unmute.");
+				gpio_set_level(GPIO_AK_PDN, 1);
+#if defined(CTC_CS48L32_SENSORY)
+				cs_spi_register_write(0, (CS48L32_MUTE_CONTROL - 4), CS48L32_REG_TYPE_MUTE_CONTROL);
+#endif
+				vTaskDelay(100 / portTICK_PERIOD_MS);
+			}
+#else
+			if((io_num == 0) && (gpio_get_level(io_num) == 0))
+			{
+				toggle ^= (1 << 0);
+				ESP_LOGE(TAG, "[AK4384VT] AMP PDN toggle[%d].", toggle);
+				gpio_set_level(GPIO_AK_PDN, toggle);
+#if defined(CTC_CS48L32_MUTE_CONTROL)
+				if(toggle)
+					cs_spi_register_write(0, (CS48L32_MUTE_CONTROL - 4), CS48L32_REG_TYPE_MUTE_CONTROL);
+				else
+					cs_spi_register_write((CS48L32_MUTE_CONTROL - 4), CS48L32_MUTE_CONTROL, CS48L32_REG_TYPE_MUTE_CONTROL);
+#endif
+				vTaskDelay(100 / portTICK_PERIOD_MS);
+			}
+#endif
+			else if((io_num == 21) && (gpio_get_level(io_num) == 0))
+			{
+#if defined(CTC_CS48L32_SENSORY_TRIGGER)
+#if defined(CTC_TRIGGER_TEST)
+				trigger_count++;
+				ESP_LOGE(TAG, "[CS48L32] Sensory detection triggered. Count[%d]", trigger_count);
+				vTaskDelay(100 / portTICK_PERIOD_MS);
+				cs_spi_sensory_ready();
+#else
+				ESP_LOGE(TAG, "[CS48L32] Sensory detection triggered.");
+				va_dsp_tap_to_talk_start();
+#endif
+#endif
+			}
+		}
+	}
+}
+
+static void esp_cs_irq_intr_init(void)
+{
+	gpio_config_t io_conf;
+	//interrupt of rising edge
+#if defined(CTC_CS48L32_SWITCH_TYPE)
+	io_conf.intr_type = GPIO_PIN_INTR_ANYEDGE;
+#else
+	io_conf.intr_type = GPIO_PIN_INTR_NEGEDGE;
+#endif
+	//bit mask of the pins, use GPIO4/5 here
+	io_conf.pin_bit_mask = GPIO_IRQ_PIN_SEL;
+	//set as input mode    
+	io_conf.mode = GPIO_MODE_INPUT;
+	//enable pull-up mode
+	io_conf.pull_up_en = 1;
+	gpio_config(&io_conf);
+
+	//create a queue to handle gpio event from isr
+	gpio_evt_queue = xQueueCreate(10, sizeof(uint32_t));
+	//start gpio task
+	xTaskCreate(gpio_task_example, "gpio_task_example", 2048, NULL, (CONFIG_ESP32_PTHREAD_TASK_PRIO_DEFAULT - 1), NULL);
+
+	//install gpio isr service
+	gpio_install_isr_service(ESP_INTR_FLAG_DEFAULT);
+	//hook isr handler for specific gpio pin
+	gpio_isr_handler_add(GPIO_ESP_SW3, gpio_isr_handler, (void*) GPIO_ESP_SW3);
+	//hook isr handler for specific gpio pin
+	gpio_isr_handler_add(GPIO_ESP_CS_IRQ, gpio_isr_handler, (void*) GPIO_ESP_CS_IRQ);
+}
 
 #if defined(BLYNK_APPS)
 #define POWEROFF	0x0

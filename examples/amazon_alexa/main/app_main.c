@@ -185,7 +185,11 @@ static const uint32_t cs48l32_config[CS48L32_CONFIG_REG][2] =
 	{0x1400,	0x0042},
 	{0x1424,	0x0012},
 	{0x1420,	0x0012},
+#if defined(EMO_ROBOT_16khz)
+	{0xA800,	0x0800},
+#else
 	{0xA800,	0x1000},
+#endif
 	{0x2000,	0x0007},
 	{0x2410,	0x00E7},
 	{0x2418,	0x0223},	// Jace. MICBIAS1A
@@ -215,12 +219,20 @@ static const uint32_t cs48l32_config[CS48L32_CONFIG_REG][2] =
 	{0xC24,		0xE1000000},
 	{0xC28,		0xE1000000},
 	{0xC2C,		0xE1000000},
+#if defined(EMO_ROBOT_16khz)
+	{0x6004,	0x0112},
+#else
 	{0x6004,	0x0221},
+#endif
 	{0x6008,	0x20200200},
 	{0x6040,	0x0010},
 	{0x6030,	0x0010},
 	{0x6000,	0x30003},
+#if defined(EMO_ROBOT_16khz)
+	{0x6084,	0x0112},
+#else
 	{0x6084,	0x0221},
+#endif
 	{0x6088,	0x20200233},
 	{0x60C0,	0x0010},
 	{0x60B0,	0x0010},
@@ -237,16 +249,30 @@ static const uint32_t cs48l32_config[CS48L32_CONFIG_REG][2] =
 	{0x8300,	0x6E80B8},
 	{0x8310,	0x6E80B8},
 #endif
+#if defined(EMO_ROBOT_16khz)
+	{0x89C0,	0x0000},
+	{0x89D0,	0x0000},
+	{0x9000,	0x8000B8},
+	{0x9020,	0x8000B8},
+#else
 	{0x89C0,	0x00B8},
 	{0x89D0,	0x00B8},
 	{0x9000,	0x80009C},
 	{0x9020,	0x80009D},
+#endif
 	{0x9040,	0x800010},
 	{0x9050,	0x800011},
+#if defined(EMO_ROBOT_16khz)
+	{0x89A0,	0x0000},
+	{0x89B0,	0x0000},
+	{0x8200,	0x800102},
+	{0x8210,	0x800102},
+#else
 	{0x89A0,	0x0102},
 	{0x89B0,	0x0103},
 	{0x8200,	0x80009A},
 	{0x8210,	0x80009A},	// Jace. 200110. Cirrus's DSP output pin 4 have delay result.
+#endif
 	{0xA808,	0x0001},
 	{0x1700C,	0x0003},
 	{0x17010,	0x0003},
@@ -1068,18 +1094,35 @@ static const uint32_t cs48l32_dsp_start[CS48L32_DSP_START_REG][2] =
 #endif
 
 #if defined(CTC_CS48L32_FLL_ASP1_BCLK)
+#if defined(EMO_ROBOT_16khz)
+#define CS48L32_FLL_CHANGE_REG	(59)
+#else
 #define CS48L32_FLL_CHANGE_REG	(57)
+#endif
 static const uint32_t cs48l32_fll_change[CS48L32_FLL_CHANGE_REG][2] =
 {
+#if defined(EMO_ROBOT_16khz)
+	{0x1C00,	0x0003},
+	{0x1C04,	0x88608030},
+	{0x1C08,	0x10000},
+	{0x1C0C,	0x22F25002},
+	{0x1C00,	0x0007},
+	{0x1C00,	0x0005},
+#else
 	{0x1C04,	0x88608020},
 	{0x1C08,	0x10000},
 	{0x1C0C,	0x21F05001},
 	{0x1C00,	0x0005},
+#endif
 	{0x1400,	0x0042},
 	{0x1404,	0x0444},
 	{0x1424,	0x0012},
 	{0x1420,	0x0012},
+#if defined(EMO_ROBOT_16khz)
+	{0xA800,	0x0800},
+#else
 	{0xA800,	0x1000},
+#endif
 	{0x2000,	0x0007},
 	{0x2410,	0x00E7},
 	{0x2418,	0x0223},	// Jace. MICBIAS1A
@@ -1109,12 +1152,20 @@ static const uint32_t cs48l32_fll_change[CS48L32_FLL_CHANGE_REG][2] =
 	{0xC24,		0xE1000000},
 	{0xC28,		0xE1000000},
 	{0xC2C,		0xE1000000},
+#if defined(EMO_ROBOT_16khz)
+	{0x6004,	0x0112},
+#else
 	{0x6004,	0x0221},
+#endif
 	{0x6008,	0x20200200},
 	{0x6040,	0x0010},
 	{0x6030,	0x0010},
 	{0x6000,	0x30003},
+#if defined(EMO_ROBOT_16khz)
+	{0x6084,	0x0112},
+#else
 	{0x6084,	0x0221},
+#endif
 	{0x6088,	0x20200233},
 	{0x60C0,	0x0010},
 	{0x60B0,	0x0010},
@@ -1131,16 +1182,30 @@ static const uint32_t cs48l32_fll_change[CS48L32_FLL_CHANGE_REG][2] =
 	{0x8300,	0x6E80B8},
 	{0x8310,	0x6E80B8},
 #endif
+#if defined(EMO_ROBOT_16khz)
+	{0x89C0,	0x0000},
+	{0x89D0,	0x0000},
+	{0x9000,	0x8000B8},
+	{0x9020,	0x8000B8},
+#else
 	{0x89C0,	0x00B8},
 	{0x89D0,	0x00B8},
 	{0x9000,	0x80009C},
 	{0x9020,	0x80009D},
+#endif
 	{0x9040,	0x800010},
 	{0x9050,	0x800011},
+#if defined(EMO_ROBOT_16khz)
+	{0x89A0,	0x0000},
+	{0x89B0,	0x0000},
+	{0x8200,	0x800102},
+	{0x8210,	0x800102},
+#else
 	{0x89A0,	0x0102},
 	{0x89B0,	0x0103},
 	{0x8200,	0x80009A},
 	{0x8210,	0x80009A},	// Jace. 200110. Cirrus's DSP output pin 4 have delay result.
+#endif
 	{0xA808,	0x0001},
 	{0x4014,	0x20000000}
 };
@@ -1164,8 +1229,13 @@ static const uint32_t cs48l32_mute_control[CS48L32_MUTE_CONTROL][2] =
 {
 	{0x8300,	0x6200B8}, // Unmute
 	{0x8310,	0x6200B8},
+#if defined(EMO_ROBOT_16khz)
+	{0x9000,	0x8080B8},
+	{0x9020,	0x8080B8},
+#else
 	{0x9000,	0x80009C},
 	{0x9020,	0x80009D},
+#endif
 	{0x8300,	0x620000}, // Mute
 	{0x8310,	0x620000},
 	{0x9000,	0x800000},
@@ -1599,7 +1669,14 @@ static void gpio_task_example(void* arg)
 				cs_spi_sensory_ready();
 #else
 				ESP_LOGE(TAG, "[CS48L32] Sensory detection triggered.");
+#if defined (EMO_ROBOT)
+				gpio_set_level(TRI_LED, 0);
+				vTaskDelay(100 / portTICK_PERIOD_MS);
+				cs_spi_sensory_ready();
+				gpio_set_level(TRI_LED, 1);
+#else
 				va_dsp_tap_to_talk_start();
+#endif
 #endif
 #endif
 			}
@@ -2016,6 +2093,25 @@ void app_main()
 
     if (!provisioned) {
         va_led_set(LED_RESET);
+
+#if defined (EMO_ROBOT)
+		/* This is a blocking call */
+		va_dsp_init(speech_recognizer_recognize, speech_recognizer_record);
+
+#if defined(EMO_ROBOT_16khz)
+		i2s_set_sample_rates(I2S_NUM_0, 16000);
+		vTaskDelay(100 / portTICK_PERIOD_MS);
+#endif
+		
+#if defined(CTC_CS48L32_FLL_ASP1_BCLK)
+		ESP_LOGE(TAG, "BCLK changed.");
+		cs_spi_register_write(0, CS48L32_FLL_CHANGE_REG, CS48L32_REG_TYPE_FLL_CHANGE);
+		vTaskDelay(100 / portTICK_PERIOD_MS);
+#endif
+		gpio_set_level(TRI_LED, 1);
+		gpio_set_level(RES_LED, 1);
+#endif
+
         printf("%s: Starting provisioning\n", TAG);
         conn_mgr_prov_t prov_type = conn_mgr_prov_mode_ble;
         prov_type.event_cb = alexa_conn_mgr_prov_cb;
@@ -2032,6 +2128,8 @@ void app_main()
         app_prov_done_cb();
         wifi_init_sta();
     }
+
+#if !defined (EMO_ROBOT)
 
     xEventGroupWaitBits(cm_event_group, CONNECTED_BIT | PROV_DONE_BIT, false, true, portMAX_DELAY);
 
@@ -2056,7 +2154,6 @@ void app_main()
     if (ret != ESP_OK) {
         while(1) vTaskDelay(2);
     }
-
     /* This is a blocking call */
     va_dsp_init(speech_recognizer_recognize, speech_recognizer_record);
 
@@ -2085,6 +2182,8 @@ void app_main()
 #endif
     /* This is only supported with minimum flash size of 8MB. */
     alexa_tone_enable_larger_tones();
+
+#endif
 
 #ifdef CONFIG_PM_ENABLE
     rtc_cpu_freq_t max_freq;

@@ -85,6 +85,16 @@ extern "C" {
 */
 #define CTC_CS48L32_TUNE_2ND_COWAY
 
+/*
+	Jace. 210730. For emotional robot project. Ps. BNCOMM.
+*/
+#define EMO_ROBOT
+
+/*
+	Jace. 210914. For emotional robot project. Ps. BNCOMM.
+*/
+#define EMO_ROBOT_16khz
+
 #ifdef __cplusplus
 }
 #endif

@@ -26,6 +26,11 @@
 
 static const char *TAG = "[va_dsp]";
 
+/*
+	Jace. 210730. For emotional robot project. Ps. BNCOMM.
+*/
+#define EMO_ROBOT
+
 enum va_dsp_state {
     STREAMING,
     STOPPED,
@@ -277,6 +282,8 @@ void va_dsp_init(va_dsp_recognize_cb_t va_dsp_recognize_cb, va_dsp_record_cb_t v
         ESP_LOGE(TAG, "Couldn't create thead");
     }
 
+#if !defined(EMO_ROBOT)
     va_boot_dsp_signal();
+#endif
     va_dsp_data.va_dsp_booted = true;
 }

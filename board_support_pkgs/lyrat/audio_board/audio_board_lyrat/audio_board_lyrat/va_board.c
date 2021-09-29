@@ -35,6 +35,11 @@
 
 bool ab_but_mute = false;
 
+/*
+	Jace. 210730. For emotional robot project. Ps. BNCOMM.
+*/
+#define EMO_ROBOT_16khz
+
 int va_board_init()
 {
     int ret;
@@ -43,7 +48,11 @@ int va_board_init()
 
     media_hal_playback_cfg_t cfg = {
         .channels = 2,
+#if defined(EMO_ROBOT_16khz)
+        .sample_rate = 16000,
+#else
         .sample_rate = 48000,
+#endif
         .i2s_port_num = I2S_NUM_0,
         .bits_per_sample = 16,
     };

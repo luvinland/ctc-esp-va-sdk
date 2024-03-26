@@ -8,6 +8,9 @@
 - Merge H/W audio pre-processor firmware (Cirrus Logic CS48L32 with Sensory trigger).
 - Follow the [Getting Started Guide](https://github.com/luvinland/ctc-esp-va-sdk/blob/master/README-Getting-Started.md) to clone the required repositories and to compile and flash the firmware.
 
+## GVA (Google Voice Assistant)
+https://drive.google.com/file/d/1ZINCQMA4f1eFg3noBX4ONo7yevVcod4U/view?usp=drive_link
+
 ## Block diagram
 ![Block diagram](https://user-images.githubusercontent.com/26864945/72865558-aa5f3900-3d1b-11ea-8b92-afdc9a0a47fd.png)
 
